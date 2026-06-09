@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#004D93">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <title>Tráfico — IngresoPorterias</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@400;500;600;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/estilos.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-logo">PorterÍas</div>
+  <div class="topbar-predio">
+    <div class="topbar-user" id="topbar-user"></div>
+    <div id="topbar-predio"></div>
+  </div>
+  <button id="btn-logout" class="btn btn-outline btn-sm" style="margin-left:8px;min-height:36px;width:auto;padding:6px 12px;font-size:.78rem">Salir</button>
+</header>
+
+<main>
+
+<!-- ── TRÁFICO — FORMULARIO ───────────────────────── -->
+<div id="view-trafico" class="view">
+  <div class="container form-section">
+    <button class="btn-back" data-goto="home">← Volver</button>
+    <div class="form-title">Tráfico</div>
+    <div class="form-subtitle">Planilla de tráfico interbase</div>
+
+    <form id="form-traf">
+      <div class="field">
+        <label>Tipo de Evento</label>
+        <div class="segmented">
+          <input type="radio" name="tipo-evento-traf" id="traf-ing" value="ingreso" checked>
+          <label for="traf-ing">↑ Ingreso</label>
+          <input type="radio" name="tipo-evento-traf" id="traf-egr" value="egreso">
+          <label for="traf-egr">↓ Egreso</label>
+        </div>
+      </div>
+      <div class="field">
+        <label>Predio</label>
+        <select id="sel-predio-traf" required></select>
+      </div>
+      <div class="field">
+        <label>Servicio</label>
+        <select id="sel-servicio-traf"></select>
+      </div>
+      <div class="field" id="row-serv-otro" style="display:none">
+        <label>Especificar servicio</label>
+        <input id="traf-serv-otro" type="text" placeholder="Descripción del servicio">
+      </div>
+      <div class="field">
+        <label>Tractor (dominio)</label>
+        <input id="traf-tractor" type="text" placeholder="Ej: ABC123" style="text-transform:uppercase">
+      </div>
+      <div class="field">
+        <label>Arrastre (dominio, opcional)</label>
+        <input id="traf-arrastre" type="text" placeholder="Ej: DEF456" style="text-transform:uppercase">
+      </div>
+      <div class="field">
+        <label>Chofer</label>
+        <div style="display:flex;gap:8px">
+          <select id="sel-chofer-traf" style="flex:1"></select>
+          <button type="button" class="btn btn-outline btn-sm btn-nuevo-chofer" style="white-space:nowrap;width:auto">+ Chofer</button>
+        </div>
+      </div>
+      <div class="field">
+        <label>Precintos</label>
+        <input id="traf-precintos" type="text" placeholder="Nros. de precinto">
+      </div>
+      <div class="field">
+        <label>Daños / Observaciones</label>
+        <textarea id="traf-danios" placeholder="Detallar daños o novedades"></textarea>
+      </div>
+      <div class="field">
+        <label>Certificado de Cobertura</label>
+        <input id="traf-cert" type="text" placeholder="Nro. de certificado">
+      </div>
+      <button type="submit" id="btn-submit-traf" class="btn btn-ingreso">↑ Registrar Ingreso</button>
+    </form>
+
+    <hr class="divider">
+    <button class="btn btn-outline" onclick="App.mostrar('dentro-traf')">Ver viajes en ruta →</button>
+  </div>
+</div>
+
+<!-- ── TRÁFICO — VIAJES EN RUTA ───────────────────── -->
+<div id="view-dentro-traf" class="view">
+  <div class="container list-section">
+    <button class="btn-back" data-goto="trafico">← Nueva operación</button>
+    <div class="form-title">Viajes en Ruta</div>
+    <div id="lista-traf"></div>
+  </div>
+</div>
+
+</main>
+
+<nav id="bottom-nav">
+  <button class="nav-item" data-pagina="home">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    Inicio
+  </button>
+  <button class="nav-item" data-pagina="distribucion">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M1 3h15l3 9H4L1 3z"/><path d="M1 3l3 9v6h16v-6"/><circle cx="7" cy="19" r="2"/><circle cx="17" cy="19" r="2"/></svg>
+    Distribuc.
+  </button>
+  <button class="nav-item" data-pagina="trafico">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+    Tráfico
+  </button>
+  <button class="nav-item" data-pagina="personal">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+    Personal
+  </button>
+  <button class="nav-item" data-pagina="indicadores" data-rol-min="supervisor">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+    KPIs
+  </button>
+</nav>
+
+<!-- ════ MODALES ════ -->
+
+<div id="modal-alta-unidad" class="modal-backdrop" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:150;align-items:center;justify-content:center;padding:16px">
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;width:100%;max-width:400px">
+    <h3 style="font-family:'Barlow Condensed',sans-serif;font-size:1.4rem;color:var(--brand);margin-bottom:16px">Nueva Unidad</h3>
+    <form id="form-alta-unidad">
+      <div class="field"><label>Tipo</label>
+        <select id="nu-tipo" required>
+          <option value="tractor">Tractor</option><option value="semirremolque">Semirremolque</option>
+          <option value="chasis">Chasis</option><option value="utilitario">Utilitario</option>
+          <option value="furgón">Furgón</option>
+        </select>
+      </div>
+      <div class="field"><label>Dominio *</label>
+        <input id="nu-dominio" type="text" required placeholder="Ej: ABC123" style="text-transform:uppercase">
+      </div>
+      <div class="field"><label>Interno (opcional)</label><input id="nu-interno" type="text" placeholder="Número interno"></div>
+      <div class="field"><label>Flota</label>
+        <select id="nu-flota"><option value="propia">Propia</option><option value="tercero">Tercero</option></select>
+      </div>
+      <div class="field"><label>Transportista (opcional)</label><input id="nu-transportista" type="text" placeholder="Nombre de la empresa"></div>
+      <div class="field"><label>Base Habitual (opcional)</label><input id="nu-base" type="text" placeholder="Ej: Mendoza"></div>
+      <div class="btn-row">
+        <button type="button" id="btn-cancelar-unidad" class="btn btn-outline">Cancelar</button>
+        <button type="submit" class="btn btn-primary">Dar de Alta</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div id="modal-alta-chofer" class="modal-backdrop" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:150;align-items:center;justify-content:center;padding:16px">
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;width:100%;max-width:400px">
+    <h3 style="font-family:'Barlow Condensed',sans-serif;font-size:1.4rem;color:var(--brand);margin-bottom:16px">Nuevo Chofer</h3>
+    <form id="form-alta-chofer">
+      <div class="field"><label>Nombre y Apellido *</label><input id="nc-nombre" type="text" required placeholder="Juan Pérez"></div>
+      <div class="field"><label>DNI (opcional)</label><input id="nc-dni" type="text" placeholder="30123456" inputmode="numeric"></div>
+      <div class="field"><label>Transportista (opcional)</label><input id="nc-transportista" type="text" placeholder="Empresa o cuenta propia"></div>
+      <div class="btn-row">
+        <button type="button" id="btn-cancelar-chofer" class="btn btn-outline">Cancelar</button>
+        <button type="submit" class="btn btn-primary">Dar de Alta</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div id="toast-container" aria-live="polite" aria-atomic="true"></div>
+
+<script src="js/api.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/catalogos.js"></script>
+<script src="js/nav.js"></script>
+<script src="js/modales.js"></script>
+<script src="js/trafico.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', async () => {
+  NavPage.init('trafico');
+  initAltaUnidad();
+  initAltaChofer();
+  initTrafico();
+  await Catalogos.cargar().catch(() => App.toast('No se pudieron cargar los catálogos', 'warn'));
+  App.mostrar('trafico');
+});
+</script>
+</body>
+</html>
