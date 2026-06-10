@@ -41,7 +41,7 @@ const Trafico = {
       App.toast(msg, 'ok');
       form.reset();
       toggleServicioOtro();
-      await this.cargarViajes();
+      this.cargarViajes();
     } else {
       App.toast(res.error, 'err');
     }

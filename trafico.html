@@ -176,13 +176,13 @@
 <script src="js/modales.js"></script>
 <script src="js/trafico.js"></script>
 <script>
-document.addEventListener('DOMContentLoaded', async () => {
+document.addEventListener('DOMContentLoaded', () => {
   NavPage.init('trafico');
   initAltaUnidad();
   initAltaChofer();
   initTrafico();
-  await Catalogos.cargar().catch(() => App.toast('No se pudieron cargar los catálogos', 'warn'));
   App.mostrar('trafico');
+  Catalogos.cargar().catch(() => App.toast('No se pudieron cargar los catálogos', 'warn'));
 });
 </script>
 </body>

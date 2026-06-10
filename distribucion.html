@@ -207,14 +207,14 @@
 <script src="js/modales.js"></script>
 <script src="js/distribucion.js"></script>
 <script>
-document.addEventListener('DOMContentLoaded', async () => {
+document.addEventListener('DOMContentLoaded', () => {
   NavPage.init('distribucion');
   initAltaUnidad();
   initAltaChofer();
   initDistribucion();
   initScanner();
-  await Catalogos.cargar().catch(() => App.toast('No se pudieron cargar los catálogos', 'warn'));
   App.mostrar('distribucion');
+  Catalogos.cargar().catch(() => App.toast('No se pudieron cargar los catálogos', 'warn'));
 });
 </script>
 </body>

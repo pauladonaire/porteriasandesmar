@@ -71,11 +71,11 @@
 <script src="js/nav.js"></script>
 <script src="js/indicadores.js"></script>
 <script>
-document.addEventListener('DOMContentLoaded', async () => {
+document.addEventListener('DOMContentLoaded', () => {
   NavPage.init('indicadores');
   initIndicadores();
-  await Catalogos.cargar().catch(() => App.toast('No se pudieron cargar los catálogos', 'warn'));
   App.mostrar('indicadores');
+  Catalogos.cargar().catch(() => App.toast('No se pudieron cargar los catálogos', 'warn'));
 });
 </script>
 </body>

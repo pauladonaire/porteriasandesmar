@@ -28,7 +28,6 @@ const Distribucion = {
     if (res.ok) {
       App.toast('Ingreso registrado — ' + res.dominio, 'ok');
       form.reset();
-      await this.cargarLista();
       App.mostrar('dentro-dist');
     } else {
       App.toast(res.error, 'err');
@@ -42,7 +41,7 @@ const Distribucion = {
     const res = await api('distribucionEgreso', { idMov, estadoCarga, detalleCarga, observaciones });
     if (res.ok) {
       App.toast('Egreso registrado — ' + res.horasDentro + 'h dentro', 'ok');
-      await this.cargarLista();
+      this.cargarLista();
     } else {
       App.toast(res.error, 'err');
     }

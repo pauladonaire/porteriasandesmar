@@ -34,7 +34,6 @@ const Personal = {
       App.toast('Ingreso registrado: ' + nombre, 'ok');
       form.reset();
       toggleMatricula();
-      await this.cargarLista();
       App.mostrar('dentro-pers');
     } else {
       App.toast(res.error, 'err');
@@ -46,7 +45,7 @@ const Personal = {
     const res = await api('personalEgreso', { idMov, observaciones });
     if (res.ok) {
       App.toast('Egreso registrado — ' + res.horasDentro + 'h dentro', 'ok');
-      await this.cargarLista();
+      this.cargarLista();
     } else {
       App.toast(res.error, 'err');
     }
