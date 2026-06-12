@@ -190,18 +190,6 @@ const Trafico = {
     if (res.ok) {
       const pendiente = res.pendienteSitrack;
 
-      // Capturar datos ANTES de resetear el form
-      const movData = pendiente ? {
-        ID_Mov:          res.id,
-        Tractor:         tractor,
-        Arrastre:        arrastre,
-        ID_Predio:       idPredio,
-        Nombre_Predio:   res.nombrePredio || '',
-        SITRACK:         estadoSitrack,
-        Tipo_Evento:     tipoEvento,
-        Gestion_Sitrack: '[]',
-      } : null;
-
       // Resetear form y UI
       form.reset();
       ['prev-cont-tractor','prev-cont-arrastre','prev-cont-extra','prev-cont-precintos','prev-cont-danos'].forEach(id => {
@@ -221,16 +209,22 @@ const Trafico = {
       toggleServicioOtro();
 
       if (pendiente) {
-        App.toast('Guardado como Pendiente SITRACK: ' + res.id, 'warn');
-        this.abrirGestion(movData, res.telefonos);
+        App.toast('Pendiente SITRACK guardado (' + res.id + '). Gestión desde "Viajes en Ruta".', 'warn');
       } else {
         let msg = 'Evento registrado.';
         if (res.idViaje && tipoEvento === 'egreso')  msg += ' Viaje abierto.';
         if (res.idViaje && tipoEvento === 'ingreso') msg += ' Viaje cerrado (' + res.horasRuta + 'h).';
         App.toast(msg, 'ok');
         if (res.advertenciaSinIngreso) {
-          App.toast('⚠️ No se encontró ingreso previo para este tractor', 'warn');
+          App.toast('Sin ingreso previo registrado para este tractor.', 'warn');
         }
+      }
+
+      // Diagnóstico de fotos: si Drive falló y se enviaron fotos, avisar
+      const hubFotos = fotosTractor.length || fotosArrastre.length || fotosExtra.length
+                    || fotosPrecintos.length || fotosDanos.length;
+      if (res.driveOk === false && hubFotos) {
+        App.toast('Drive sin autorización — las fotos no se guardaron. Ver instrucciones de deploy.', 'warn');
       }
 
       this.cargarViajes();
