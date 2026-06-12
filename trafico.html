@@ -32,8 +32,10 @@
     <div class="form-subtitle">Planilla de tráfico interbase</div>
 
     <form id="form-traf">
+
+      <!-- ── Tipo de evento ──────────────────────────────── -->
       <div class="field">
-        <label>Tipo de Evento</label>
+        <label>Tipo de Evento *</label>
         <div class="segmented">
           <input type="radio" name="tipo-evento-traf" id="traf-ing" value="ingreso" checked>
           <label for="traf-ing">↑ Ingreso</label>
@@ -41,10 +43,14 @@
           <label for="traf-egr">↓ Egreso</label>
         </div>
       </div>
+
+      <!-- ── Predio ──────────────────────────────────────── -->
       <div class="field">
-        <label>Predio</label>
+        <label>Predio *</label>
         <select id="sel-predio-traf" required></select>
       </div>
+
+      <!-- ── Servicio ────────────────────────────────────── -->
       <div class="field">
         <label>Servicio</label>
         <select id="sel-servicio-traf"></select>
@@ -53,33 +59,173 @@
         <label>Especificar servicio</label>
         <input id="traf-serv-otro" type="text" placeholder="Descripción del servicio">
       </div>
+
+      <!-- ── Tractor ─────────────────────────────────────── -->
       <div class="field">
-        <label>Tractor (dominio)</label>
-        <input id="traf-tractor" type="text" placeholder="Ej: ABC123" style="text-transform:uppercase">
+        <label>Tractor (dominio) *</label>
+        <input id="traf-tractor" type="text" placeholder="Ej: ABC123 o AB123CD"
+               style="text-transform:uppercase" inputmode="text" autocomplete="off">
+        <div class="field-note">Formatos válidos: ABC123 · AB123CD</div>
       </div>
+
+      <!-- ── Furgón / Arrastre ───────────────────────────── -->
       <div class="field">
-        <label>Arrastre (dominio, opcional)</label>
-        <input id="traf-arrastre" type="text" placeholder="Ej: DEF456" style="text-transform:uppercase">
+        <label>Furgón / Arrastre (dominio, opcional)</label>
+        <input id="traf-arrastre" type="text" placeholder="Ej: DEF456"
+               style="text-transform:uppercase">
       </div>
+
+      <!-- ── Conductor ───────────────────────────────────── -->
       <div class="field">
-        <label>Chofer</label>
+        <label>Conductor</label>
         <div style="display:flex;gap:8px">
           <select id="sel-chofer-traf" style="flex:1"></select>
-          <button type="button" class="btn btn-outline btn-sm btn-nuevo-chofer" style="white-space:nowrap;width:auto">+ Chofer</button>
+          <button type="button" class="btn btn-outline btn-sm btn-nuevo-chofer"
+                  style="white-space:nowrap;width:auto">+ Chofer</button>
         </div>
       </div>
+
+      <!-- ── Operador de portería (NUEVO) ───────────────── -->
+      <div class="field">
+        <label>Operador de portería *</label>
+        <input id="traf-operador" type="text" placeholder="Nombre y apellido del operador"
+               required autocomplete="name">
+      </div>
+
+      <!-- ── Estado operativo (NUEVO) ───────────────────── -->
+      <div class="field">
+        <label>Estado operativo *</label>
+        <div class="segmented">
+          <input type="radio" name="estado-operativo" id="traf-op-ok"  value="operativo" checked>
+          <label for="traf-op-ok">✅ Operativo</label>
+          <input type="radio" name="estado-operativo" id="traf-op-obs" value="observacion">
+          <label for="traf-op-obs">⚠️ Observación</label>
+          <input type="radio" name="estado-operativo" id="traf-op-no"  value="no-operativo">
+          <label for="traf-op-no">🔴 No operativo</label>
+        </div>
+        <div class="warn-inline" id="warn-estado-op">
+          Estado Observación/No operativo: marcá al menos un daño físico o escribí en Observaciones.
+        </div>
+      </div>
+
+      <!-- ── Estado SITRACK (NUEVO) ─────────────────────── -->
+      <div class="field">
+        <label>Estado SITRACK *</label>
+        <div class="segmented">
+          <input type="radio" name="estado-sitrack" id="traf-sit-ok"   value="sitrack-ok" checked>
+          <label for="traf-sit-ok">OK</label>
+          <input type="radio" name="estado-sitrack" id="traf-sit-fall" value="falla">
+          <label for="traf-sit-fall">⚠️ Falla de servicio</label>
+          <input type="radio" name="estado-sitrack" id="traf-sit-sin"  value="sin-reporte">
+          <label for="traf-sit-sin">🔴 Sin reporte</label>
+        </div>
+      </div>
+
+      <!-- ── Precintos ───────────────────────────────────── -->
       <div class="field">
         <label>Precintos</label>
         <input id="traf-precintos" type="text" placeholder="Nros. de precinto">
       </div>
+
+      <!-- ── Certificados (REEMPLAZA al campo único) ─────── -->
       <div class="field">
-        <label>Daños / Observaciones</label>
-        <textarea id="traf-danios" placeholder="Detallar daños o novedades"></textarea>
+        <label>Cert. cobertura — Tractor</label>
+        <input id="traf-cert-tractor" type="text" placeholder="N° certificado tractor">
       </div>
       <div class="field">
-        <label>Certificado de Cobertura</label>
-        <input id="traf-cert" type="text" placeholder="Nro. de certificado">
+        <label>Cert. cobertura — Furgón / Arrastre</label>
+        <input id="traf-cert-arrastre" type="text" placeholder="N° certificado arrastre">
       </div>
+
+      <!-- ── Limpieza (NUEVO) ────────────────────────────── -->
+      <div class="field">
+        <label>Limpieza *</label>
+        <div class="segmented">
+          <input type="radio" name="limpieza" id="traf-limp-lim" value="limpio" checked>
+          <label for="traf-limp-lim">Limpio</label>
+          <input type="radio" name="limpieza" id="traf-limp-suc" value="sucio">
+          <label for="traf-limp-suc">Sucio</label>
+        </div>
+        <div class="warn-inline" id="warn-sucio">
+          Unidad sucia: si hay evidencia tomá una foto en la sección de fotos.
+        </div>
+      </div>
+
+      <!-- ── Equipamiento (NUEVO) ───────────────────────── -->
+      <div class="field">
+        <label>Equipamiento — verificar presencia</label>
+        <div class="chip-group">
+          <input type="checkbox" id="eq-cadenas"   name="equipamiento" value="Cadenas">
+          <label for="eq-cadenas">Cadenas</label>
+          <input type="checkbox" id="eq-auxilio"   name="equipamiento" value="Auxilio">
+          <label for="eq-auxilio">Auxilio</label>
+          <input type="checkbox" id="eq-manijas"   name="equipamiento" value="Manijas">
+          <label for="eq-manijas">Manijas</label>
+          <input type="checkbox" id="eq-precintado" name="equipamiento" value="Precintado">
+          <label for="eq-precintado">Precintado</label>
+        </div>
+      </div>
+
+      <!-- ── Daños físicos (NUEVO) ──────────────────────── -->
+      <div class="field">
+        <label>Estado físico — daños detectados</label>
+        <div class="chip-group danos">
+          <input type="checkbox" id="dan-golpe"      name="danos-fisicos" value="Golpe">
+          <label for="dan-golpe">Golpe</label>
+          <input type="checkbox" id="dan-rayon"      name="danos-fisicos" value="Rayón">
+          <label for="dan-rayon">Rayón</label>
+          <input type="checkbox" id="dan-abolladura" name="danos-fisicos" value="Abolladura">
+          <label for="dan-abolladura">Abolladura</label>
+          <input type="checkbox" id="dan-luz-rota"   name="danos-fisicos" value="Luz rota">
+          <label for="dan-luz-rota">Luz rota</label>
+          <input type="checkbox" id="dan-puerta"     name="danos-fisicos" value="Puerta no cierra">
+          <label for="dan-puerta">Puerta no cierra</label>
+          <input type="checkbox" id="dan-carroceria" name="danos-fisicos" value="Carrocería">
+          <label for="dan-carroceria">Carrocería</label>
+        </div>
+      </div>
+
+      <!-- ── Observaciones (renombrado) ─────────────────── -->
+      <div class="field">
+        <label>Observaciones / novedades adicionales</label>
+        <textarea id="traf-obs" placeholder="Describí novedades, daños adicionales u observaciones libres"></textarea>
+      </div>
+
+      <!-- ── Fotos (NUEVO) ──────────────────────────────── -->
+      <div class="field">
+        <label>Foto Tractor *</label>
+        <div class="foto-wrap">
+          <label class="foto-btn" id="lbl-foto-tractor" for="traf-foto-tractor">
+            📷 Tomar / Elegir
+          </label>
+          <input type="file" id="traf-foto-tractor" accept="image/*" capture="environment"
+                 style="display:none">
+          <img id="prev-foto-tractor" class="foto-preview" alt="Foto tractor">
+        </div>
+      </div>
+      <div class="field" id="field-foto-arrastre">
+        <label>Foto Furgón / Arrastre *</label>
+        <div class="foto-wrap">
+          <label class="foto-btn" id="lbl-foto-arrastre" for="traf-foto-arrastre">
+            📷 Tomar / Elegir
+          </label>
+          <input type="file" id="traf-foto-arrastre" accept="image/*" capture="environment"
+                 style="display:none">
+          <img id="prev-foto-arrastre" class="foto-preview" alt="Foto arrastre">
+        </div>
+      </div>
+      <div class="field">
+        <label>Foto Evidencia Extra (opcional)</label>
+        <div class="foto-wrap">
+          <label class="foto-btn" id="lbl-foto-extra" for="traf-foto-extra">
+            📷 Tomar / Elegir
+          </label>
+          <input type="file" id="traf-foto-extra" accept="image/*" capture="environment"
+                 style="display:none">
+          <img id="prev-foto-extra" class="foto-preview" alt="Foto extra">
+        </div>
+      </div>
+
       <button type="submit" id="btn-submit-traf" class="btn btn-ingreso">↑ Registrar Ingreso</button>
     </form>
 

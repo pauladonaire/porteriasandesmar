@@ -589,3 +589,103 @@ body[data-rol="admin"]      .nav-item[data-rol-min="supervisor"] { display: flex
 .text-warn    { color: var(--warn);    }
 .text-brand   { color: var(--accent);  }
 .text-muted   { color: var(--text-muted); }
+
+/* ── Chip groups (checkboxes multi-selección como botones) ──── */
+.chip-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.chip-group input[type="checkbox"] { display: none; }
+.chip-group label {
+  padding: 8px 14px;
+  border: 1.5px solid var(--border);
+  border-radius: 99px;
+  font-size: .82rem;
+  font-weight: 600;
+  cursor: pointer;
+  color: var(--text-muted);
+  transition: background .15s, color .15s, border-color .15s;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  user-select: none;
+  text-transform: none;
+  letter-spacing: 0;
+}
+.chip-group input:checked + label {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+}
+.chip-group.danos input:checked + label {
+  background: var(--egreso);
+  border-color: var(--egreso);
+}
+
+/* Colores segmented para estado operativo, SITRACK y limpieza */
+.segmented input[value="operativo"]:checked    + label { background: var(--ingreso); }
+.segmented input[value="observacion"]:checked  + label { background: var(--warn); }
+.segmented input[value="no-operativo"]:checked + label { background: var(--egreso); }
+.segmented input[value="sitrack-ok"]:checked   + label { background: var(--ingreso); }
+.segmented input[value="falla"]:checked        + label { background: var(--warn); }
+.segmented input[value="sin-reporte"]:checked  + label { background: var(--egreso); }
+.segmented input[value="limpio"]:checked       + label { background: var(--ingreso); }
+.segmented input[value="sucio"]:checked        + label { background: var(--warn); }
+
+/* Mensaje de advertencia inline (no bloqueante) */
+.warn-inline {
+  background: rgba(217,119,6,.08);
+  border: 1px solid rgba(217,119,6,.28);
+  border-radius: var(--radius-sm);
+  color: var(--warn);
+  font-size: .82rem;
+  font-weight: 500;
+  padding: 10px 14px;
+  margin-top: 6px;
+  display: none;
+  line-height: 1.4;
+}
+.warn-inline.visible { display: block; }
+
+/* Inputs de foto */
+.foto-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.foto-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: .88rem;
+  font-weight: 600;
+  cursor: pointer;
+  color: var(--text);
+  background: var(--bg);
+  transition: border-color .15s, color .15s;
+  min-height: 46px;
+  white-space: nowrap;
+}
+.foto-btn:hover       { border-color: var(--accent); color: var(--primary); }
+.foto-btn.tiene-foto  { border-color: var(--ingreso); color: var(--ingreso); }
+.foto-preview {
+  width: 64px;
+  height: 64px;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  display: none;
+}
+.foto-preview.visible { display: block; }
+
+/* Nota/hint bajo campo */
+.field-note {
+  font-size: .72rem;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
