@@ -683,6 +683,129 @@ body[data-rol="admin"]      .nav-item[data-rol-min="supervisor"] { display: flex
 }
 .foto-preview.visible { display: block; }
 
+.foto-preview-cont {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 6px;
+}
+.foto-preview-cont .foto-preview {
+  display: block;
+  flex-shrink: 0;
+}
+
+/* ── Aviso SITRACK en el formulario ──────────────────────── */
+.warn-sitrack {
+  background: rgba(230, 81, 0, .10);
+  border: 1px solid rgba(230, 81, 0, .35);
+  color: #BF360C;
+  padding: 10px 12px;
+  border-radius: var(--radius);
+  font-size: .88rem;
+  line-height: 1.5;
+  margin-top: 8px;
+}
+
+/* ── Modal gestión SITRACK ───────────────────────────────── */
+.sitrack-info-block {
+  background: var(--surface-alt, #f4f4f6);
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 14px;
+  font-size: .9rem;
+  line-height: 1.7;
+}
+
+.sitrack-action-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+  align-items: center;
+}
+
+.btn-wa-verde {
+  flex: 1;
+  background: #25D366;
+  color: #fff;
+  border-color: #25D366;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 40px;
+  border-radius: var(--radius);
+  font-weight: 600;
+  font-size: .9rem;
+}
+
+.btn-wa-azul {
+  flex: 1;
+  background: #1565C0;
+  color: #fff;
+  border-color: #1565C0;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 40px;
+  border-radius: var(--radius);
+  font-weight: 600;
+  font-size: .9rem;
+}
+
+.btn-confirm-accion.accion-confirmada {
+  background: #2E7D32;
+  color: #fff;
+  border-color: #2E7D32;
+}
+
+.sitrack-historial {
+  max-height: 130px;
+  overflow-y: auto;
+  font-size: .82rem;
+  color: var(--text-muted, #888);
+  margin-top: 4px;
+}
+
+.historial-label {
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+
+.historial-entry {
+  padding: 3px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.historial-entry:last-child { border-bottom: none; }
+
+/* ── Tarjeta pendiente SITRACK ───────────────────────────── */
+.pendiente-card { border-left: 4px solid #E65100; }
+
+.tag-pendiente {
+  background: rgba(230, 81, 0, .12);
+  color: #BF360C;
+  border: 1px solid rgba(230, 81, 0, .30);
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: .78rem;
+  font-weight: 600;
+}
+
+.pending-header {
+  font-weight: 700;
+  font-size: .88rem;
+  color: #E65100;
+  margin: 10px 0 6px;
+  padding: 6px 4px 6px 8px;
+  border-left: 3px solid #E65100;
+  background: rgba(230, 81, 0, .06);
+  border-radius: 0 4px 4px 0;
+}
+
 /* Nota/hint bajo campo */
 .field-note {
   font-size: .72rem;

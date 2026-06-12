@@ -119,12 +119,23 @@
           <input type="radio" name="estado-sitrack" id="traf-sit-sin"  value="sin-reporte">
           <label for="traf-sit-sin">🔴 Sin reporte</label>
         </div>
+        <div class="warn-sitrack" id="warn-sitrack" style="display:none">
+          ⚠️ Falla SITRACK detectada. El registro se guardará como <strong>Pendiente</strong> hasta resolver la gestión.
+        </div>
       </div>
 
       <!-- ── Precintos ───────────────────────────────────── -->
       <div class="field">
         <label>Precintos</label>
         <input id="traf-precintos" type="text" placeholder="Nros. de precinto">
+      </div>
+      <div class="field">
+        <label>Foto Precintos (opcional)</label>
+        <div class="foto-wrap">
+          <label class="foto-btn" id="lbl-foto-precintos" for="traf-foto-precintos">📷 Tomar / Elegir</label>
+          <input type="file" id="traf-foto-precintos" accept="image/*" style="display:none" multiple>
+        </div>
+        <div id="prev-cont-precintos" class="foto-preview-cont"></div>
       </div>
 
       <!-- ── Certificados (REEMPLAZA al campo único) ─────── -->
@@ -184,6 +195,14 @@
           <label for="dan-carroceria">Carrocería</label>
         </div>
       </div>
+      <div class="field" id="field-foto-danos" style="display:none">
+        <label>Foto de daños detectados</label>
+        <div class="foto-wrap">
+          <label class="foto-btn" id="lbl-foto-danos" for="traf-foto-danos">📷 Tomar / Elegir</label>
+          <input type="file" id="traf-foto-danos" accept="image/*" style="display:none" multiple>
+        </div>
+        <div id="prev-cont-danos" class="foto-preview-cont"></div>
+      </div>
 
       <!-- ── Observaciones (renombrado) ─────────────────── -->
       <div class="field">
@@ -198,10 +217,10 @@
           <label class="foto-btn" id="lbl-foto-tractor" for="traf-foto-tractor">
             📷 Tomar / Elegir
           </label>
-          <input type="file" id="traf-foto-tractor" accept="image/*" capture="environment"
-                 style="display:none">
-          <img id="prev-foto-tractor" class="foto-preview" alt="Foto tractor">
+          <input type="file" id="traf-foto-tractor" accept="image/*"
+                 style="display:none" multiple>
         </div>
+        <div id="prev-cont-tractor" class="foto-preview-cont"></div>
       </div>
       <div class="field" id="field-foto-arrastre">
         <label>Foto Furgón / Arrastre *</label>
@@ -209,10 +228,10 @@
           <label class="foto-btn" id="lbl-foto-arrastre" for="traf-foto-arrastre">
             📷 Tomar / Elegir
           </label>
-          <input type="file" id="traf-foto-arrastre" accept="image/*" capture="environment"
-                 style="display:none">
-          <img id="prev-foto-arrastre" class="foto-preview" alt="Foto arrastre">
+          <input type="file" id="traf-foto-arrastre" accept="image/*"
+                 style="display:none" multiple>
         </div>
+        <div id="prev-cont-arrastre" class="foto-preview-cont"></div>
       </div>
       <div class="field">
         <label>Foto Evidencia Extra (opcional)</label>
@@ -220,10 +239,10 @@
           <label class="foto-btn" id="lbl-foto-extra" for="traf-foto-extra">
             📷 Tomar / Elegir
           </label>
-          <input type="file" id="traf-foto-extra" accept="image/*" capture="environment"
-                 style="display:none">
-          <img id="prev-foto-extra" class="foto-preview" alt="Foto extra">
+          <input type="file" id="traf-foto-extra" accept="image/*"
+                 style="display:none" multiple>
         </div>
+        <div id="prev-cont-extra" class="foto-preview-cont"></div>
       </div>
 
       <button type="submit" id="btn-submit-traf" class="btn btn-ingreso">↑ Registrar Ingreso</button>
@@ -238,7 +257,9 @@
 <div id="view-dentro-traf" class="view">
   <div class="container list-section">
     <button class="btn-back" data-goto="trafico">← Nueva operación</button>
-    <div class="form-title">Viajes en Ruta</div>
+    <div id="header-pendientes-sitrack" class="pending-header" style="display:none">⚠️ Pendientes SITRACK</div>
+    <div id="lista-pendientes-sitrack"></div>
+    <div class="form-title" style="margin-top:12px">Viajes en Ruta</div>
     <div id="lista-traf"></div>
   </div>
 </div>
@@ -310,6 +331,44 @@
         <button type="submit" class="btn btn-primary">Dar de Alta</button>
       </div>
     </form>
+  </div>
+</div>
+
+<!-- ── MODAL GESTIÓN SITRACK ──────────────────────── -->
+<div id="modal-sitrack" class="modal-backdrop" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:200;align-items:flex-start;justify-content:center;padding:16px;overflow-y:auto">
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;width:100%;max-width:480px;margin-top:8px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <h3 style="font-size:1.2rem;color:#E65100;margin:0;font-weight:700">⚠️ Gestión SITRACK</h3>
+      <button id="btn-cerrar-sitrack" class="btn btn-outline btn-sm" style="width:auto;padding:4px 12px;font-size:1rem">✕</button>
+    </div>
+
+    <div id="spit-info" class="sitrack-info-block"></div>
+
+    <div class="sitrack-action-row">
+      <a id="btn-wa-sitrack" href="#" target="_blank" rel="noopener" class="btn btn-wa-verde">📱 Contactar SITRACK</a>
+      <button id="btn-confirm-sitrack" type="button" class="btn btn-sm btn-outline btn-confirm-accion">✓ Envié</button>
+    </div>
+
+    <div class="sitrack-action-row">
+      <a id="btn-wa-trafico" href="#" target="_blank" rel="noopener" class="btn btn-wa-azul">📱 Avisar a Tráfico</a>
+      <button id="btn-confirm-trafico" type="button" class="btn btn-sm btn-outline btn-confirm-accion">✓ Envié</button>
+    </div>
+
+    <div id="spit-historial" class="sitrack-historial"></div>
+
+    <div class="field" style="margin-top:10px">
+      <label>Comentario / novedad</label>
+      <textarea id="spit-comentario" rows="2" placeholder="Ej: SITRACK en camino, confirman en 30 min…"></textarea>
+      <button id="btn-add-comentario" type="button" class="btn btn-outline btn-sm" style="margin-top:6px;width:auto">+ Agregar comentario</button>
+    </div>
+
+    <hr style="margin:14px 0;border:none;border-top:1px solid var(--border)">
+
+    <div class="field">
+      <label>Observación final — para cerrar el registro *</label>
+      <textarea id="spit-obs-final" rows="2" placeholder="Ej: SITRACK normalizó a las 15:30, unidad operativa"></textarea>
+    </div>
+    <button id="btn-finalizar-pendiente" type="button" class="btn btn-primary">✅ Finalizar registro</button>
   </div>
 </div>
 
