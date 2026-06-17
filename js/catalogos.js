@@ -68,6 +68,112 @@ const Catalogos = {
       opt.textContent = labelFn(item);
       sel.appendChild(opt);
     });
+    // Si hay combobox asociado, limpiar el texto del input
+    if (sel._comboInput) sel._comboInput.value = '';
+  },
+
+  // ── Combobox con búsqueda predictiva ──────────────────────────
+  // Transforma un <select> en un input con filtro en tiempo real.
+  // El <select> queda oculto pero sigue siendo la fuente de verdad.
+  initCombobox(selectId, placeholder) {
+    const sel = document.getElementById(selectId);
+    if (!sel || sel._comboboxInited) return;
+    sel._comboboxInited = true;
+
+    // Envolver el select
+    const wrap = document.createElement('div');
+    wrap.className = 'combobox-wrap';
+    sel.parentNode.insertBefore(wrap, sel);
+    wrap.appendChild(sel);
+    // Transferir flex inline si lo tenía (ej: sel-chofer-traf tiene flex:1)
+    if (sel.style.flex) { wrap.style.flex = sel.style.flex; sel.style.removeProperty('flex'); }
+    sel.style.display = 'none';
+
+    // Input visible
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.className = 'combobox-input';
+    input.placeholder = placeholder || '— Seleccionar —';
+    input.setAttribute('autocomplete', 'off');
+    input.setAttribute('autocorrect', 'off');
+    input.setAttribute('autocapitalize', 'off');
+    input.setAttribute('spellcheck', 'false');
+    wrap.insertBefore(input, sel);
+    sel._comboInput = input;
+
+    // Flecha indicadora
+    const arrow = document.createElement('span');
+    arrow.className = 'combobox-arrow';
+    arrow.innerHTML = '&#9660;';
+    wrap.appendChild(arrow);
+
+    // Dropdown
+    const dropdown = document.createElement('div');
+    dropdown.className = 'combobox-dropdown';
+    wrap.appendChild(dropdown);
+
+    const getOptions = () => Array.from(sel.options).filter(o => o.value !== '');
+
+    const highlight = (text, q) => {
+      if (!q) return text;
+      const idx = text.toLowerCase().indexOf(q.toLowerCase());
+      if (idx === -1) return text;
+      return text.substring(0, idx)
+        + '<mark>' + text.substring(idx, idx + q.length) + '</mark>'
+        + text.substring(idx + q.length);
+    };
+
+    const renderDropdown = (q) => {
+      const lower = (q || '').trim().toLowerCase();
+      const all   = getOptions();
+      const opts  = lower ? all.filter(o => o.textContent.toLowerCase().includes(lower)) : all;
+      const show  = opts.slice(0, 60);
+      if (!show.length) {
+        dropdown.innerHTML = '<div class="combobox-empty">Sin resultados</div>';
+      } else {
+        dropdown.innerHTML = show.map(o => {
+          const lbl = o.textContent;
+          const val = o.value.replace(/"/g, '&quot;');
+          const lblEsc = lbl.replace(/"/g, '&quot;');
+          return `<div class="combobox-option" data-value="${val}" data-label="${lblEsc}">${highlight(lbl, lower)}</div>`;
+        }).join('');
+        dropdown.querySelectorAll('.combobox-option').forEach(opt => {
+          const choose = (e) => {
+            e.preventDefault();
+            sel.value    = opt.dataset.value;
+            input.value  = opt.dataset.label;
+            dropdown.style.display = 'none';
+            sel.dispatchEvent(new Event('change', { bubbles: true }));
+          };
+          opt.addEventListener('mousedown', choose);
+          opt.addEventListener('touchstart', choose, { passive: false });
+        });
+      }
+      dropdown.style.display = '';
+    };
+
+    const closeDropdown = () => {
+      dropdown.style.display = 'none';
+      // Si el input no coincide con ninguna opción y no hay valor seleccionado, limpiar
+      if (!sel.value) { input.value = ''; return; }
+      // Restaurar texto si el usuario escribió algo que no terminó en selección
+      const selOpt = Array.from(sel.options).find(o => o.value === sel.value);
+      if (selOpt) input.value = selOpt.textContent;
+    };
+
+    input.addEventListener('focus', () => renderDropdown(input.value));
+    input.addEventListener('input', () => renderDropdown(input.value));
+    input.addEventListener('blur',  () => setTimeout(closeDropdown, 200));
+
+    arrow.addEventListener('mousedown', e => {
+      e.preventDefault();
+      if (!dropdown.style.display || dropdown.style.display === 'none') {
+        renderDropdown('');
+        input.focus();
+      } else {
+        dropdown.style.display = 'none';
+      }
+    });
   },
 
   // ── Obtener unidad por ID (desde caché o API) ────────────────

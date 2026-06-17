@@ -192,6 +192,11 @@ const Trafico = {
 
       // Resetear form y UI
       form.reset();
+      // Los comboboxes no se resetean con form.reset() — limpiar manualmente
+      ['sel-predio-traf', 'sel-servicio-traf', 'sel-chofer-traf'].forEach(id => {
+        const s = document.getElementById(id);
+        if (s && s._comboInput) s._comboInput.value = '';
+      });
       ['prev-cont-tractor','prev-cont-arrastre','prev-cont-extra','prev-cont-precintos','prev-cont-danos'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.innerHTML = '';
@@ -295,43 +300,55 @@ const Trafico = {
     this.renderizarPendientes(this._pendientes);
   },
 
+  _pendienteCardHtml(p) {
+    const predio     = p.Nombre_Predio || Catalogos.nombrePredio(p.ID_Predio) || p.ID_Predio;
+    const tipoLabel  = p.Tipo_Evento === 'ingreso' ? '↑ Ingreso' : '↓ Egreso';
+    const sitrackLbl = p.SITRACK === 'sin-reporte' ? 'Sin reporte' : 'Falla de servicio';
+    const ts         = String(p.FechaHora_Ingreso || p.FechaHora_Egreso || '').replace('T', ' ').substring(0, 16);
+    return `
+      <div class="mov-card pendiente-card">
+        <div class="mov-card-header">
+          <span class="mov-card-id">${p.ID_Mov}</span>
+          <span class="tag tag-pendiente">⚠️ SITRACK</span>
+        </div>
+        <div class="mov-card-detail">
+          <strong>${p.Tractor}</strong>${p.Arrastre ? ' / ' + p.Arrastre : ''} — ${tipoLabel}
+        </div>
+        <div class="mov-card-detail">
+          <strong>Predio:</strong> ${predio} &nbsp;
+          <strong>Estado:</strong> ${sitrackLbl}
+        </div>
+        <div class="mov-card-detail text-muted">${ts}</div>
+        <div class="btn-row" style="margin-top:8px">
+          <button class="btn btn-outline btn-sm" onclick="Trafico._abrirGestionById('${p.ID_Mov}')">Gestión</button>
+          <button class="btn btn-primary btn-sm" onclick="Trafico._abrirFinalizarById('${p.ID_Mov}')">Finalizar</button>
+        </div>
+      </div>`;
+  },
+
   renderizarPendientes(pendientes) {
     const header    = document.getElementById('header-pendientes-sitrack');
     const container = document.getElementById('lista-pendientes-sitrack');
-    if (!container) return;
+    const panel     = document.getElementById('panel-pendientes-traf');
+    const panelBody = document.getElementById('panel-pend-lista');
+    const panelCnt  = document.getElementById('panel-pend-count');
 
     if (!pendientes.length) {
-      container.innerHTML = '';
-      if (header) header.style.display = 'none';
+      if (container) container.innerHTML = '';
+      if (header)    header.style.display = 'none';
+      if (panel)     panel.style.display  = 'none';
       return;
     }
-    if (header) header.style.display = '';
 
-    container.innerHTML = pendientes.map(p => {
-      const predio     = p.Nombre_Predio || Catalogos.nombrePredio(p.ID_Predio) || p.ID_Predio;
-      const tipoLabel  = p.Tipo_Evento === 'ingreso' ? '↑ Ingreso' : '↓ Egreso';
-      const sitrackLbl = p.SITRACK === 'sin-reporte' ? 'Sin reporte' : 'Falla de servicio';
-      const ts         = String(p.FechaHora_Ingreso || p.FechaHora_Egreso || '').replace('T', ' ').substring(0, 16);
-      return `
-        <div class="mov-card pendiente-card">
-          <div class="mov-card-header">
-            <span class="mov-card-id">${p.ID_Mov}</span>
-            <span class="tag tag-pendiente">⚠️ SITRACK</span>
-          </div>
-          <div class="mov-card-detail">
-            <strong>${p.Tractor}</strong>${p.Arrastre ? ' / ' + p.Arrastre : ''} — ${tipoLabel}
-          </div>
-          <div class="mov-card-detail">
-            <strong>Predio:</strong> ${predio} &nbsp;
-            <strong>Estado:</strong> ${sitrackLbl}
-          </div>
-          <div class="mov-card-detail text-muted">${ts}</div>
-          <div class="btn-row" style="margin-top:8px">
-            <button class="btn btn-outline btn-sm" onclick="Trafico._abrirGestionById('${p.ID_Mov}')">Gestión</button>
-            <button class="btn btn-primary btn-sm" onclick="Trafico._abrirFinalizarById('${p.ID_Mov}')">Finalizar</button>
-          </div>
-        </div>`;
-    }).join('');
+    const html = pendientes.map(p => this._pendienteCardHtml(p)).join('');
+    const n    = pendientes.length;
+
+    if (header)    header.style.display = '';
+    if (container) container.innerHTML  = html;
+
+    if (panel)    panel.style.display  = '';
+    if (panelBody) panelBody.innerHTML = html;
+    if (panelCnt)  panelCnt.textContent = n + ' pendiente' + (n !== 1 ? 's' : '');
   },
 
   _abrirGestionById(idMov) {
@@ -561,4 +578,9 @@ function initTrafico() {
 
   // Modal SITRACK
   initSitrackModal();
+
+  // Selects con búsqueda predictiva
+  Catalogos.initCombobox('sel-predio-traf',   'Buscar predio…');
+  Catalogos.initCombobox('sel-servicio-traf', 'Buscar servicio…');
+  Catalogos.initCombobox('sel-chofer-traf',   'Buscar chofer por nombre…');
 }
