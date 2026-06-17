@@ -149,7 +149,7 @@ const Catalogos = {
           opt.addEventListener('touchstart', choose, { passive: false });
         });
       }
-      dropdown.style.display = '';
+      dropdown.style.display = 'block';
     };
 
     const closeDropdown = () => {
@@ -167,7 +167,7 @@ const Catalogos = {
 
     arrow.addEventListener('mousedown', e => {
       e.preventDefault();
-      if (!dropdown.style.display || dropdown.style.display === 'none') {
+      if (dropdown.style.display !== 'block') {
         renderDropdown('');
         input.focus();
       } else {
