@@ -28,6 +28,10 @@ const Distribucion = {
     if (res.ok) {
       App.toast('Ingreso registrado — ' + res.dominio, 'ok');
       form.reset();
+      ['sel-predio-dist', 'sel-unidad-dist', 'sel-chofer-dist'].forEach(id => {
+        const s = document.getElementById(id);
+        if (s && s._comboInput) s._comboInput.value = '';
+      });
       App.mostrar('dentro-dist');
     } else {
       App.toast(res.error, 'err');
@@ -128,4 +132,9 @@ function initDistribucion() {
       e.target.reset();
     }
   });
+
+  // Selects con búsqueda predictiva
+  Catalogos.initCombobox('sel-predio-dist',  'Buscar predio…');
+  Catalogos.initCombobox('sel-unidad-dist',  'Buscar unidad o dominio…');
+  Catalogos.initCombobox('sel-chofer-dist',  'Buscar chofer por nombre…');
 }

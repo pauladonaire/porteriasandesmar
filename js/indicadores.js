@@ -141,4 +141,7 @@ function initIndicadores() {
     const hasta    = document.getElementById('ind-hasta').value;
     await Indicadores.cargar(idPredio, desde, hasta);
   });
+
+  // Select con búsqueda predictiva
+  Catalogos.initCombobox('ind-predio', 'Todos los predios…');
 }

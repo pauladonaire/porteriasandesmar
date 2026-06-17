@@ -34,6 +34,8 @@ const Personal = {
       App.toast('Ingreso registrado: ' + nombre, 'ok');
       form.reset();
       toggleMatricula();
+      const sp = document.getElementById('sel-predio-pers');
+      if (sp && sp._comboInput) sp._comboInput.value = '';
       App.mostrar('dentro-pers');
     } else {
       App.toast(res.error, 'err');
@@ -138,4 +140,7 @@ function initPersonal() {
       e.target.reset();
     }
   });
+
+  // Select con búsqueda predictiva
+  Catalogos.initCombobox('sel-predio-pers', 'Buscar predio…');
 }
