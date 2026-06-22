@@ -175,13 +175,40 @@ const Trafico = {
       leerFotos('traf-foto-danos'),
     ]);
 
+    // Filtrar strings vacíos por fallo de canvas en mobile
+    const tractorValidas   = fotosTractor.filter(Boolean);
+    const arrastreValidas  = fotosArrastre.filter(Boolean);
+    const precintosValidos = fotosPrecintos.filter(Boolean);
+    const danosValidas     = fotosDanos.filter(Boolean);
+
+    if (!tractorValidas.length) {
+      App.toast('Foto del tractor obligatoria', 'err');
+      btn.disabled = false; actualizarBotonSubmit(form); return;
+    }
+    if (!arrastreValidas.length) {
+      App.toast('Foto del furgón/arrastre obligatoria', 'err');
+      btn.disabled = false; actualizarBotonSubmit(form); return;
+    }
+    if (!precintosValidos.length) {
+      App.toast('Foto de precintos obligatoria', 'err');
+      btn.disabled = false; actualizarBotonSubmit(form); return;
+    }
+    if (danosChecked.length && !danosValidas.length) {
+      App.toast('Marcaste daños físicos: foto de daños obligatoria', 'err');
+      btn.disabled = false; actualizarBotonSubmit(form); return;
+    }
+
     const res = await api('traficoEvento', {
       tipoEvento, idPredio, idServicio, servicioOtro,
       chofer, tractor, arrastre, precintos,
       operador, estadoOperativo: estadoOp, estadoSitrack,
       certTractor, certArrastre, limpieza,
       equipamiento, danos, observaciones,
-      fotosTractor, fotosArrastre, fotosExtra, fotosPrecintos, fotosDanos,
+      fotosTractor:   tractorValidas,
+      fotosArrastre:  arrastreValidas,
+      fotosExtra:     fotosExtra.filter(Boolean),
+      fotosPrecintos: precintosValidos,
+      fotosDanos:     danosValidas,
     });
 
     btn.disabled = false;
@@ -226,8 +253,8 @@ const Trafico = {
       }
 
       // Diagnóstico de fotos: si Drive falló y se enviaron fotos, avisar
-      const hubFotos = fotosTractor.length || fotosArrastre.length || fotosExtra.length
-                    || fotosPrecintos.length || fotosDanos.length;
+      const hubFotos = tractorValidas.length || arrastreValidas.length || fotosExtra.filter(Boolean).length
+                    || precintosValidos.length || danosValidas.length;
       if (res.driveOk === false && hubFotos) {
         App.toast('Drive sin autorización — las fotos no se guardaron. Ver instrucciones de deploy.', 'warn');
       }
