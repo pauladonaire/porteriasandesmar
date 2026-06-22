@@ -322,9 +322,15 @@ const Trafico = {
   async cargarPendientes() {
     const res = await api('traficosPendientes', {});
     if (!res.ok) return;
-    this._pendientes         = res.pendientes || [];
-    this._pendientesTelefonos = res.telefonos || {};
+    this._pendientes          = res.pendientes || [];
+    this._pendientesTelefonos = res.telefonos  || {};
     this.renderizarPendientes(this._pendientes);
+
+    const autoId = new URLSearchParams(window.location.search).get('sitrack');
+    if (autoId) {
+      history.replaceState(null, '', window.location.pathname);
+      this._abrirGestionById(autoId);
+    }
   },
 
   _pendienteCardHtml(p) {

@@ -152,7 +152,7 @@ function _renderSitrack(items) {
     const arrastre = p.Arrastre ? ' + ' + p.Arrastre : '';
     const tipoCls  = p.Tipo_Evento === 'ingreso' ? 'tipo-ingreso' : 'tipo-egreso';
     const tipoLbl  = p.Tipo_Evento === 'ingreso' ? '↑ ING' : '↓ EGR';
-    return `<div class="dash-row" onclick="window.location.href='trafico.html'" style="cursor:pointer">
+    return `<div class="dash-row" onclick="window.location.href='trafico.html?sitrack=${p.ID_Mov}'" style="cursor:pointer">
       <div class="dash-row-left">
         <span class="dash-tipo-badge ${tipoCls}">${tipoLbl}</span>
         <div style="min-width:0">
