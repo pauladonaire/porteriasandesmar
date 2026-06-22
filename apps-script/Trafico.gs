@@ -157,7 +157,7 @@ function traficoEvento(payload, usuario, origen) {
 
   var sheet = getSheet_(SHEET_IDS.MOV_TRAFICO, 'MOV_TRAFICO', HEADERS.MOV_TRAFICO);
   var ts    = now_();
-  var id    = nextId_(sheet, ID_PREFIJOS.MOV_TRAFICO);
+  var id    = nextId_(sheet, ID_PREFIJOS.MOV_TRAFICO, 8);
 
   // ── Lógica de viajes ──────────────────────────────────────
   var idViaje   = '';
