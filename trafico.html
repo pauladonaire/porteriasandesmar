@@ -398,6 +398,9 @@ document.addEventListener('DOMContentLoaded', () => {
   initTrafico();
   App.mostrar('trafico');
   Catalogos.cargar().catch(() => App.toast('No se pudieron cargar los catálogos', 'warn'));
+  if (new URLSearchParams(window.location.search).get('sitrack')) {
+    Trafico.cargarViajes();
+  }
 });
 </script>
 </body>
