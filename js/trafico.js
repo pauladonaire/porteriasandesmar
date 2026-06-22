@@ -320,16 +320,29 @@ const Trafico = {
   // ── Pendientes SITRACK ──────────────────────────────────
 
   async cargarPendientes() {
-    const res = await api('traficosPendientes', {});
-    if (!res.ok) return;
-    this._pendientes          = res.pendientes || [];
-    this._pendientesTelefonos = res.telefonos  || {};
-    this.renderizarPendientes(this._pendientes);
+    const storedRaw = sessionStorage.getItem('pendSitrack');
 
-    const autoId = new URLSearchParams(window.location.search).get('sitrack');
-    if (autoId) {
-      history.replaceState(null, '', window.location.pathname);
-      this._abrirGestionById(autoId);
+    const res = await api('traficosPendientes', {});
+    if (res.ok) {
+      this._pendientes          = res.pendientes || [];
+      this._pendientesTelefonos = res.telefonos  || {};
+      this.renderizarPendientes(this._pendientes);
+    }
+
+    const urlId = new URLSearchParams(window.location.search).get('sitrack');
+    let storedMov = null;
+    try { if (storedRaw) storedMov = JSON.parse(storedRaw); } catch(e) {}
+    const autoId = urlId || (storedMov ? storedMov.ID_Mov : null);
+
+    if (!autoId) return;
+    if (urlId) history.replaceState(null, '', window.location.pathname);
+    sessionStorage.removeItem('pendSitrack');
+
+    const fromApi = this._pendientes.find(p => p.ID_Mov === autoId);
+    if (fromApi) {
+      this.abrirGestion(fromApi, this._pendientesTelefonos);
+    } else if (storedMov) {
+      this.abrirGestion(storedMov, this._pendientesTelefonos);
     }
   },
 

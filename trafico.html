@@ -396,11 +396,9 @@ document.addEventListener('DOMContentLoaded', () => {
   initAltaUnidad();
   initAltaChofer();
   initTrafico();
-  App.mostrar('trafico');
   Catalogos.cargar().catch(() => App.toast('No se pudieron cargar los catálogos', 'warn'));
-  if (new URLSearchParams(window.location.search).get('sitrack')) {
-    Trafico.cargarViajes();
-  }
+  const hasPend = sessionStorage.getItem('pendSitrack') || new URLSearchParams(window.location.search).get('sitrack');
+  App.mostrar(hasPend ? 'dentro-traf' : 'trafico');
 });
 </script>
 </body>

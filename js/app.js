@@ -139,20 +139,30 @@ function _fmtHoras(h) {
 
 // ── Renders del dashboard ─────────────────────────────────────
 
+let _cacheSitrack = [];
+
+function _abrirSitrackDesdeHome(idx) {
+  const p = _cacheSitrack[idx];
+  if (!p) return;
+  try { sessionStorage.setItem('pendSitrack', JSON.stringify(p)); } catch(e) {}
+  window.location.href = 'trafico.html';
+}
+
 function _renderSitrack(items) {
+  _cacheSitrack = items;
   const el = document.getElementById('sitrack-body');
   if (!el) return;
   if (!items.length) {
     el.innerHTML = '<div class="dash-empty">Sin pendientes SITRACK</div>';
     return;
   }
-  el.innerHTML = items.map(p => {
+  el.innerHTML = items.map((p, i) => {
     const hora     = _horaCorta(p.FechaHora_Ingreso || p.FechaHora_Egreso);
     const servicio = p.Nombre_Servicio || p.ID_Servicio || '—';
     const arrastre = p.Arrastre ? ' + ' + p.Arrastre : '';
     const tipoCls  = p.Tipo_Evento === 'ingreso' ? 'tipo-ingreso' : 'tipo-egreso';
     const tipoLbl  = p.Tipo_Evento === 'ingreso' ? '↑ ING' : '↓ EGR';
-    return `<div class="dash-row" onclick="window.location.href='trafico.html?sitrack=${p.ID_Mov}'" style="cursor:pointer">
+    return `<div class="dash-row" onclick="_abrirSitrackDesdeHome(${i})" style="cursor:pointer">
       <div class="dash-row-left">
         <span class="dash-tipo-badge ${tipoCls}">${tipoLbl}</span>
         <div style="min-width:0">
