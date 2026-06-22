@@ -106,6 +106,73 @@
         <div class="badge-count" id="badge-pers">0 adentro</div>
       </div>
     </div>
+
+    <!-- ── Dashboard dinámico ─────────────────────────────── -->
+    <div id="dash-loading" class="dash-loading" style="display:none">Actualizando...</div>
+    <div id="dash-content" style="display:none">
+
+      <!-- Pendientes SITRACK (visible solo si hay pendientes) -->
+      <div id="section-sitrack" class="dash-section dash-section--warn" style="display:none">
+        <button class="dash-section-header" onclick="App.toggleSection('sitrack-body','chev-sitrack')">
+          <span style="font-size:1rem;flex-shrink:0">⚠</span>
+          <span class="dash-section-title">Pendientes SITRACK</span>
+          <span class="dash-badge-count" id="count-sitrack">0</span>
+          <span class="dash-chevron open" id="chev-sitrack">▾</span>
+        </button>
+        <div id="sitrack-body" class="dash-body"></div>
+      </div>
+
+      <!-- Viajes en ruta (siempre visible, incluye días anteriores) -->
+      <div class="dash-section dash-section--viaje">
+        <button class="dash-section-header" onclick="App.toggleSection('viajes-body','chev-viajes')">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--viaje)" stroke-width="2.2" style="flex-shrink:0">
+            <polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/>
+            <polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/>
+          </svg>
+          <span class="dash-section-title">Viajes en ruta</span>
+          <span class="dash-badge-count" id="count-viajes">0</span>
+          <span class="dash-chevron open" id="chev-viajes">▾</span>
+        </button>
+        <div id="viajes-body" class="dash-body"></div>
+      </div>
+
+      <!-- Registros del día -->
+      <div class="dash-day-header">
+        <span>Registros del día</span>
+        <span id="dash-fecha" class="dash-day-date"></span>
+      </div>
+
+      <div class="dash-section">
+        <button class="dash-section-header" onclick="App.toggleSection('dist-hoy-body','chev-dist')">
+          <span class="dash-sub-dot" style="background:var(--ingreso)"></span>
+          <span class="dash-section-title">Distribución</span>
+          <span class="dash-badge-count" id="count-dist-hoy">0</span>
+          <span class="dash-chevron" id="chev-dist">▾</span>
+        </button>
+        <div id="dist-hoy-body" class="dash-body" style="display:none"></div>
+      </div>
+
+      <div class="dash-section">
+        <button class="dash-section-header" onclick="App.toggleSection('traf-hoy-body','chev-traf')">
+          <span class="dash-sub-dot" style="background:var(--viaje)"></span>
+          <span class="dash-section-title">Tráfico</span>
+          <span class="dash-badge-count" id="count-traf-hoy">0</span>
+          <span class="dash-chevron" id="chev-traf">▾</span>
+        </button>
+        <div id="traf-hoy-body" class="dash-body" style="display:none"></div>
+      </div>
+
+      <div class="dash-section" style="margin-bottom:20px">
+        <button class="dash-section-header" onclick="App.toggleSection('pers-hoy-body','chev-pers')">
+          <span class="dash-sub-dot" style="background:var(--warn)"></span>
+          <span class="dash-section-title">Personal</span>
+          <span class="dash-badge-count" id="count-pers-hoy">0</span>
+          <span class="dash-chevron" id="chev-pers">▾</span>
+        </button>
+        <div id="pers-hoy-body" class="dash-body" style="display:none"></div>
+      </div>
+
+    </div><!-- /dash-content -->
   </div>
 </div>
 

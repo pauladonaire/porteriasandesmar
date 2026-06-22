@@ -442,6 +442,124 @@ function traficoHistorial(payload, usuario) {
 }
 
 // ─────────────────────────────────────────────────────────────
+// DASHBOARD — resumen del estado actual y registros del día
+// ─────────────────────────────────────────────────────────────
+
+function getDashboard(payload, usuario) {
+  var hoy = Utilities.formatDate(new Date(), ZONA_HORARIA, 'yyyy-MM-dd');
+
+  function limpiar(rows) {
+    return rows.map(function(r) {
+      var o = {};
+      for (var k in r) { if (k !== '_row') o[k] = r[k]; }
+      return o;
+    });
+  }
+
+  // ── Predios (para resolver nombres en viajes) ─────────────
+  var prediosSheet = getSheet_(SHEET_IDS.PREDIOS, 'PREDIOS', HEADERS.PREDIOS);
+  var prediosRows  = readAll_(prediosSheet);
+  function nombrePredio(id) {
+    var p = prediosRows.find(function(r) { return String(r.ID_Predio).trim() === String(id).trim(); });
+    return p ? String(p.Nombre || '') : String(id || '');
+  }
+
+  // ── MOV_TRAFICO ────────────────────────────────────────────
+  var trafSheet = getSheet_(SHEET_IDS.MOV_TRAFICO, 'MOV_TRAFICO', HEADERS.MOV_TRAFICO);
+  var trafRows  = readAll_(trafSheet);
+
+  var pendientesSitrack = trafRows.filter(function(r) {
+    return String(r.Estado).toLowerCase() === 'pendiente_sitrack'
+        && puedeOperarPredio_(usuario, r.ID_Predio);
+  });
+  pendientesSitrack.sort(function(a, b) {
+    return String(b.FechaHora_Ingreso || b.FechaHora_Egreso || '').localeCompare(
+           String(a.FechaHora_Ingreso || a.FechaHora_Egreso || ''));
+  });
+
+  var trafHoy = trafRows.filter(function(r) {
+    var ts = String(r.FechaHora_Ingreso || r.FechaHora_Egreso || '');
+    return ts.indexOf(hoy) === 0 && puedeOperarPredio_(usuario, r.ID_Predio);
+  });
+  trafHoy.sort(function(a, b) {
+    var ta = String(a.FechaHora_Ingreso || a.FechaHora_Egreso || '');
+    var tb = String(b.FechaHora_Ingreso || b.FechaHora_Egreso || '');
+    return tb.localeCompare(ta);
+  });
+
+  // ── VIAJES EN RUTA ─────────────────────────────────────────
+  var viajesSheet = getSheet_(SHEET_IDS.VIAJES, 'VIAJES', HEADERS.VIAJES);
+  var viajesRows  = readAll_(viajesSheet);
+  var enRuta = viajesRows.filter(function(r) {
+    if (String(r.Estado).toLowerCase() !== 'en_ruta') return false;
+    return puedeOperarPredio_(usuario, r.Predio_Origen)
+        || puedeOperarPredio_(usuario, r.Predio_Destino);
+  }).map(function(r) {
+    var o = {};
+    for (var k in r) { if (k !== '_row') o[k] = r[k]; }
+    o._horasEnRuta   = horasEntre_(String(r.FechaHora_Salida), now_());
+    o._nombreOrigen  = nombrePredio(r.Predio_Origen);
+    o._nombreDestino = nombrePredio(r.Predio_Destino);
+    return o;
+  });
+  enRuta.sort(function(a, b) {
+    return String(b.FechaHora_Salida || '').localeCompare(String(a.FechaHora_Salida || ''));
+  });
+
+  // ── MOV_DISTRIBUCION ───────────────────────────────────────
+  var distSheet = getSheet_(SHEET_IDS.MOV_DISTRIBUCION, 'MOV_DISTRIBUCION', HEADERS.MOV_DISTRIBUCION);
+  var distRows  = readAll_(distSheet);
+
+  var distDentro = distRows.filter(function(r) {
+    return String(r.Estado).toLowerCase() === 'abierto'
+        && puedeOperarPredio_(usuario, r.ID_Predio);
+  }).length;
+
+  var distHoy = distRows.filter(function(r) {
+    var ts = String(r.FechaHora_Ingreso || '');
+    return ts.indexOf(hoy) === 0 && puedeOperarPredio_(usuario, r.ID_Predio);
+  });
+  distHoy.sort(function(a, b) {
+    return String(b.FechaHora_Ingreso || '').localeCompare(String(a.FechaHora_Ingreso || ''));
+  });
+
+  // ── MOV_PERSONAL ───────────────────────────────────────────
+  var persSheet = getSheet_(SHEET_IDS.MOV_PERSONAL, 'MOV_PERSONAL', HEADERS.MOV_PERSONAL);
+  var persRows  = readAll_(persSheet);
+
+  var persAdentro = persRows.filter(function(r) {
+    return String(r.Estado).toLowerCase() === 'abierto'
+        && puedeOperarPredio_(usuario, r.ID_Predio);
+  }).length;
+
+  var persHoy = persRows.filter(function(r) {
+    var ts = String(r.FechaHora_Ingreso || '');
+    return ts.indexOf(hoy) === 0 && puedeOperarPredio_(usuario, r.ID_Predio);
+  });
+  persHoy.sort(function(a, b) {
+    return String(b.FechaHora_Ingreso || '').localeCompare(String(a.FechaHora_Ingreso || ''));
+  });
+
+  return {
+    ok:    true,
+    fecha: hoy,
+    counts: {
+      distDentro:  distDentro,
+      trafEnRuta:  enRuta.length,
+      persAdentro: persAdentro,
+    },
+    pendientesSitrack: limpiar(pendientesSitrack),
+    viajesEnRuta:      enRuta,
+    hoy: {
+      dist: limpiar(distHoy),
+      traf: limpiar(trafHoy),
+      pers: limpiar(persHoy),
+    },
+    telefonos: { sitrack: TELEFONO_SITRACK, trafico: TELEFONO_TRAFICO_FALLAS },
+  };
+}
+
+// ─────────────────────────────────────────────────────────────
 // SETUP — ejecutar UNA SOLA VEZ desde el editor de GAS
 // ─────────────────────────────────────────────────────────────
 
