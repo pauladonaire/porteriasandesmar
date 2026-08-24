@@ -4,7 +4,8 @@
 // HELPERS DE FOTO
 // ─────────────────────────────────────────────────────────────
 
-const PATENTE_RE = /^([A-Z]{3}\d{3}|[A-Z]{2}\d{3}[A-Z]{2})$/;
+// Argentina: ABC123 (vieja) · AB123CD (Mercosur) — Chile: AB1234 (vieja) · ABCD12 (nueva/Mercosur)
+const PATENTE_RE = /^([A-Z]{3}\d{3}|[A-Z]{2}\d{3}[A-Z]{2}|[A-Z]{2}\d{4}|[A-Z]{4}\d{2})$/;
 
 function validarPatente(str) {
   return PATENTE_RE.test(String(str).trim().toUpperCase());
@@ -134,11 +135,11 @@ const Trafico = {
     if (!tractor)     { App.toast('Dominio tractor obligatorio', 'err'); return; }
 
     if (!validarPatente(tractor)) {
-      App.toast('Dominio tractor inválido — formato: ABC123 o AB123CD', 'err');
+      App.toast('Dominio tractor inválido — formatos: ABC123, AB123CD, AB1234 o ABCD12', 'err');
       return;
     }
     if (arrastre && !validarPatente(arrastre)) {
-      App.toast('Dominio arrastre inválido — formato: ABC123 o AB123CD', 'err');
+      App.toast('Dominio arrastre inválido — formatos: ABC123, AB123CD, AB1234 o ABCD12', 'err');
       return;
     }
 
