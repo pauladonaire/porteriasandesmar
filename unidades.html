@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#004D93">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <title>KPIs — IngresoPorterias</title>
+  <title>Unidades — IngresoPorterias</title>
   <link rel="icon" href="data:,">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@400;500;600;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
@@ -25,17 +25,22 @@
 
 <main>
 
-<!-- ── INDICADORES ────────────────────────────────── -->
-<div id="view-indicadores" class="view">
+<!-- ── UNIDADES / EXPORTAR QR ─────────────────────── -->
+<div id="view-unidades" class="view">
   <div class="container">
-    <div class="form-title" style="padding-top:16px">Indicadores</div>
-    <form id="form-indicadores" class="filter-bar" style="margin-top:12px">
-      <select id="ind-predio"></select>
-      <input id="ind-desde" type="date">
-      <input id="ind-hasta" type="date">
-      <button type="submit" class="btn btn-primary btn-sm" style="white-space:nowrap;width:auto">Actualizar</button>
-    </form>
-    <div id="kpi-container"></div>
+    <button class="btn-back" data-goto="home">← Volver</button>
+    <div class="form-title" style="padding-top:16px">Unidades de Distribución</div>
+    <div class="form-subtitle">Catálogo sincronizado desde Drivin — exportá los QR para imprimir</div>
+
+    <div class="qr-toolbar">
+      <input type="text" id="qr-buscar" placeholder="Buscar por dominio, interno, flota o transportista…">
+      <button type="button" id="btn-imprimir-qr" class="btn btn-primary btn-sm" style="width:auto">🖨️ Exportar / Imprimir</button>
+    </div>
+
+    <div id="qr-empty" class="empty" style="display:none">
+      <p>Sin unidades para mostrar</p>
+    </div>
+    <div id="qr-grid" class="qr-grid"></div>
   </div>
 </div>
 
@@ -74,13 +79,15 @@
 <script src="js/auth.js"></script>
 <script src="js/catalogos.js"></script>
 <script src="js/nav.js"></script>
-<script src="js/indicadores.js"></script>
+<script src="js/unidades.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-  NavPage.init('indicadores');
-  initIndicadores();
-  App.mostrar('indicadores');
-  Catalogos.cargar().catch(() => App.toast('No se pudieron cargar los catálogos', 'warn'));
+  const u = Sesion.obtener();
+  if (!u || u.Rol !== 'admin') { window.location.href = 'index.html'; return; }
+  NavPage.init('unidades');
+  initUnidades();
+  App.mostrar('unidades');
+  Catalogos.cargar().then(() => Unidades.render()).catch(() => App.toast('No se pudieron cargar los catálogos', 'warn'));
 });
 </script>
 </body>

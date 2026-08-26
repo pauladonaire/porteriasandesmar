@@ -134,6 +134,9 @@ button, input, select, textarea { font-family: inherit; }
 body[data-rol="supervisor"] .nav-item[data-rol-min="supervisor"],
 body[data-rol="admin"]      .nav-item[data-rol-min="supervisor"] { display: flex; }
 
+.nav-item[data-rol-min="admin"] { display: none; }
+body[data-rol="admin"] .nav-item[data-rol-min="admin"] { display: flex; }
+
 /* ── Cards de tipo (home) ───────────────────────────────────── */
 .home-grid {
   display: grid;
@@ -1085,4 +1088,37 @@ body[data-rol="admin"]      .nav-item[data-rol-min="supervisor"] { display: flex
   letter-spacing: 0;
   text-transform: none;
   font-size: .78rem;
+}
+
+/* ── Unidades / Exportar QR (admin) ────────────────────────────── */
+.qr-toolbar {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin: 12px 0 16px;
+}
+.qr-toolbar input[type="text"] { flex: 1; min-width: 160px; }
+.qr-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 12px;
+}
+.qr-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 10px;
+  text-align: center;
+  background: var(--bg);
+}
+.qr-card img { width: 100%; max-width: 130px; height: auto; }
+.qr-card .qr-dominio { font-weight: 700; font-size: .85rem; margin-top: 6px; }
+.qr-card .qr-interno { font-size: .72rem; color: var(--text-muted); }
+.qr-card .qr-flota   { font-size: .68rem; color: var(--text-muted); margin-top: 2px; }
+
+@media print {
+  header.topbar, #bottom-nav, .qr-toolbar, .btn-back, #toast-container { display: none !important; }
+  body, main { background: #fff; }
+  .qr-grid { grid-template-columns: repeat(4, 1fr); }
+  .qr-card { break-inside: avoid; border-color: #999; }
 }

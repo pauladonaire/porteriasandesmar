@@ -75,11 +75,12 @@ const Distribucion = {
       const horas = typeof m._horasDentroActual === 'number'
         ? m._horasDentroActual.toFixed(1) + 'h'
         : '—';
-      const predio = Catalogos.nombrePredio(m.ID_Predio);
+      const predio = m.Nombre_Predio || Catalogos.nombrePredio(m.ID_Predio);
+      const dominioLbl = (m.Dominio || m.ID_Unidad) + (m.Interno ? ' [' + m.Interno + ']' : '');
       return `
         <div class="mov-card ingreso-border">
           <div class="mov-card-header">
-            <span class="mov-card-id">${m.Dominio || m.ID_Unidad}</span>
+            <span class="mov-card-id">${dominioLbl}</span>
             <span class="tag tag-abierto">↑ ${horas}</span>
           </div>
           <div class="mov-card-detail">
