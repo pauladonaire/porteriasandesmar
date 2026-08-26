@@ -1100,6 +1100,8 @@ body[data-rol="admin"] .nav-item[data-rol-min="admin"] { display: flex; }
 }
 .qr-toolbar input[type="text"] { flex: 1; min-width: 160px; }
 .qr-hint { font-size: .72rem; color: var(--text-muted); margin: -8px 0 14px; }
+.qr-label-size-field { display: flex; align-items: center; gap: 6px; font-size: .78rem; color: var(--text-muted); }
+.qr-label-size-field input[type="number"] { width: 64px; }
 .qr-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
@@ -1121,13 +1123,36 @@ body[data-rol="admin"] .nav-item[data-rol-min="admin"] { display: flex; }
 .qr-card .qr-interno { font-size: .72rem; color: var(--text-muted); }
 .qr-card .qr-flota   { font-size: .68rem; color: var(--text-muted); margin-top: 2px; }
 
+/* Tamaño de etiqueta (mm) — el valor real lo inyecta js/unidades.js en #qr-label-size,
+   según lo que se cargue en los campos de Ancho/Alto. Esto son los defaults de respaldo. */
 @media print {
-  header.topbar, #bottom-nav, .qr-toolbar, .qr-hint, .btn-back, #toast-container { display: none !important; }
-  body, main { background: #fff; }
-  .qr-grid { grid-template-columns: repeat(4, 1fr); }
-  .qr-card { break-inside: avoid; border-color: #999; box-shadow: none; }
+  header.topbar, #bottom-nav, .qr-toolbar, .qr-hint, .btn-back, #toast-container,
+  #view-unidades .form-title, #view-unidades .form-subtitle { display: none !important; }
+  body, main { background: #fff; margin: 0; padding: 0; }
+
+  .qr-grid { display: block; }
   .qr-grid.has-selection .qr-card:not(.selected) { display: none !important; }
   .qr-select, .qr-interno, .qr-flota { display: none !important; }
+
+  /* Una etiqueta por hoja: cada .qr-card ocupa una página entera */
+  .qr-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    box-shadow: none;
+    border-radius: 0;
+    margin: 0 auto;
+    box-sizing: border-box;
+    break-inside: avoid;
+    page-break-after: always;
+    width: 100mm;
+    height: 150mm;
+  }
+  .qr-card:last-child { page-break-after: auto; }
+  .qr-card .qr-img { width: 60%; max-width: none; height: auto; }
+  .qr-card .qr-dominio { font-size: 1.6rem; margin-top: 6mm; }
 
   /* Impresión de un solo QR desde el modal individual */
   body.qr-print-single main,
@@ -1139,7 +1164,19 @@ body[data-rol="admin"] .nav-item[data-rol-min="admin"] { display: flex; }
     background: none !important;
     padding: 0;
   }
-  body.qr-print-single #modal-qr-individual > div { border: none; box-shadow: none; }
+  body.qr-print-single #modal-qr-individual > div {
+    border: none;
+    box-shadow: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100mm;
+    height: 150mm;
+    max-width: none;
+    margin: 0 auto;
+  }
+  body.qr-print-single #qr-modal-img { width: 60%; max-width: none; height: auto; }
   body.qr-print-single #btn-cerrar-qr-modal,
   body.qr-print-single #btn-imprimir-qr-modal { display: none !important; }
 }

@@ -87,8 +87,27 @@ const Unidades = {
   },
 
   imprimirModal() {
+    Unidades.actualizarTamanoEtiqueta();
     document.body.classList.add('qr-print-single');
     window.print();
+  },
+
+  // ── Tamaño de etiqueta configurable (mm) ──────────────────────
+  actualizarTamanoEtiqueta() {
+    const w = parseFloat(document.getElementById('qr-label-w')?.value) || 100;
+    const h = parseFloat(document.getElementById('qr-label-h')?.value) || 150;
+    const style = document.getElementById('qr-label-size');
+    if (!style) return;
+    style.textContent = `
+      @page { size: ${w}mm ${h}mm; margin: 0; }
+      @media print {
+        .qr-card,
+        body.qr-print-single #modal-qr-individual > div {
+          width: ${w}mm;
+          height: ${h}mm;
+        }
+      }
+    `;
   },
 };
 
@@ -96,9 +115,16 @@ function initUnidades() {
   const buscar = document.getElementById('qr-buscar');
   if (buscar) buscar.addEventListener('input', () => Unidades.render(buscar.value));
 
-  document.getElementById('btn-imprimir-qr')?.addEventListener('click', () => window.print());
+  document.getElementById('btn-imprimir-qr')?.addEventListener('click', () => {
+    Unidades.actualizarTamanoEtiqueta();
+    window.print();
+  });
   document.getElementById('btn-sel-todo')?.addEventListener('click', () => Unidades.seleccionarTodo(true));
   document.getElementById('btn-sel-ninguno')?.addEventListener('click', () => Unidades.seleccionarTodo(false));
+
+  document.getElementById('qr-label-w')?.addEventListener('input', () => Unidades.actualizarTamanoEtiqueta());
+  document.getElementById('qr-label-h')?.addEventListener('input', () => Unidades.actualizarTamanoEtiqueta());
+  Unidades.actualizarTamanoEtiqueta();
 
   document.getElementById('btn-cerrar-qr-modal')?.addEventListener('click', () => Unidades.cerrarModal());
   document.getElementById('btn-imprimir-qr-modal')?.addEventListener('click', () => Unidades.imprimirModal());

@@ -11,6 +11,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@400;500;600;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/estilos.css">
+  <style id="qr-label-size"></style>
 </head>
 <body>
 
@@ -37,9 +38,16 @@
       <button type="button" id="btn-sel-todo" class="btn btn-outline btn-sm" style="width:auto">Seleccionar todo</button>
       <button type="button" id="btn-sel-ninguno" class="btn btn-outline btn-sm" style="width:auto">Ninguno</button>
       <span id="qr-contador" class="text-muted" style="font-size:.78rem"></span>
+    </div>
+    <div class="qr-toolbar">
+      <label class="qr-label-size-field">
+        Etiqueta:
+        <input type="number" id="qr-label-w" value="100" min="20" max="300" step="1"> ×
+        <input type="number" id="qr-label-h" value="150" min="20" max="300" step="1"> mm
+      </label>
       <button type="button" id="btn-imprimir-qr" class="btn btn-primary btn-sm" style="width:auto">🖨️ Exportar / Imprimir</button>
     </div>
-    <div class="qr-hint">Tocá una tarjeta para elegirla. Sin nada seleccionado, se exporta todo lo que ves en pantalla. Al imprimir solo sale el QR y el dominio.</div>
+    <div class="qr-hint">Tocá una tarjeta para elegirla. Sin nada seleccionado, se exporta todo lo que ves en pantalla — una etiqueta por hoja, con el tamaño indicado arriba, solo QR + dominio.</div>
 
     <div id="qr-empty" class="empty" style="display:none">
       <p>Sin unidades para mostrar</p>
