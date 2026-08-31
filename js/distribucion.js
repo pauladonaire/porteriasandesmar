@@ -9,6 +9,7 @@ const Distribucion = {
     const estadoCarga  = form.querySelector('input[name="estado-carga-dist"]:checked')?.value;
     const detalleCarga = form.querySelector('#det-carga-dist').value;
     const observaciones= form.querySelector('#obs-dist').value;
+    const tipoIngreso  = form.querySelector('#chk-nocturno-dist')?.checked ? 'nocturno' : 'normal';
 
     if (!idPredio)    { App.toast('Seleccioná el predio', 'err'); return; }
     if (!idUnidad)    { App.toast('Seleccioná o escaneá la unidad', 'err'); return; }
@@ -19,7 +20,7 @@ const Distribucion = {
     btn.innerHTML = '<span class="spinner"></span> Registrando...';
 
     const res = await api('distribucionIngreso', {
-      idPredio, idUnidad, chofer, estadoCarga, detalleCarga, observaciones,
+      idPredio, idUnidad, chofer, estadoCarga, detalleCarga, observaciones, tipoIngreso,
     });
 
     btn.disabled = false;
@@ -56,18 +57,29 @@ const Distribucion = {
   async cargarLista() {
     const res = await api('distribucionAbiertos');
     if (!res.ok) { App.toast('Error al cargar lista', 'err'); return; }
-    this.renderizarLista(res.movimientos || []);
-    // Actualizar badge
+    const movs      = res.movimientos || [];
+    const nocturnos = movs.filter(m => String(m.Tipo_Ingreso || '').toLowerCase() === 'nocturno');
+    const normales  = movs.filter(m => String(m.Tipo_Ingreso || '').toLowerCase() !== 'nocturno');
+
+    this.renderizarLista(normales, 'lista-dist');
+    this.renderizarLista(nocturnos, 'lista-dist-nocturno');
+
+    const cNormales  = document.getElementById('count-ingreso-real');
+    if (cNormales) cNormales.textContent = normales.length;
+    const cNocturnos = document.getElementById('count-nocturno');
+    if (cNocturnos) cNocturnos.textContent = nocturnos.length;
+
+    // Actualizar badge (total, incluye ambos)
     const badge = document.getElementById('badge-dist');
-    if (badge) badge.textContent = (res.movimientos || []).length + ' dentro';
+    if (badge) badge.textContent = movs.length + ' dentro';
   },
 
-  renderizarLista(movs) {
-    const container = document.getElementById('lista-dist');
+  renderizarLista(movs, containerId) {
+    const container = document.getElementById(containerId);
     if (!container) return;
 
     if (!movs.length) {
-      container.innerHTML = '<div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M1 3h15l3 9H4L1 3z"/><path d="M1 3l3 9v6h16v-6l-3-9"/></svg><p>Sin unidades adentro</p></div>';
+      container.innerHTML = '<div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M1 3h15l3 9H4L1 3z"/><path d="M1 3l3 9v6h16v-6l-3-9"/></svg><p>Sin unidades</p></div>';
       return;
     }
 

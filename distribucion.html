@@ -62,6 +62,12 @@
         </div>
       </div>
       <div class="field">
+        <div class="chip-group">
+          <input type="checkbox" id="chk-nocturno-dist">
+          <label for="chk-nocturno-dist">🌙 Estacionamiento Nocturno</label>
+        </div>
+      </div>
+      <div class="field">
         <label>Detalle de Carga (opcional)</label>
         <input id="det-carga-dist" type="text" placeholder="Ej: Mercadería fría, 12 pallets">
       </div>
@@ -82,7 +88,18 @@
   <div class="container list-section">
     <button class="btn-back" data-goto="distribucion">← Nueva operación</button>
     <div class="form-title">Unidades Adentro</div>
+
+    <div class="dash-section-header" style="padding-left:0">
+      <span class="dash-section-title">↑ Ingresos</span>
+      <span id="count-ingreso-real" class="dash-badge-count">0</span>
+    </div>
     <div id="lista-dist"></div>
+
+    <div class="dash-section-header" style="padding-left:0;margin-top:18px">
+      <span class="dash-section-title">🌙 Estacionamiento Nocturno</span>
+      <span id="count-nocturno" class="dash-badge-count">0</span>
+    </div>
+    <div id="lista-dist-nocturno"></div>
   </div>
 </div>
 
