@@ -35,7 +35,7 @@ function initAltaUnidad() {
 
     if (res.ok) {
       App.toast('Unidad ' + (res.dominio || '') + ' dada de alta', 'ok');
-      await Catalogos.cargar();
+      await Catalogos.cargar(true); // forzado: que el alta recién hecha se vea ya, no en 60s
       cerrar();
     } else {
       App.toast(res.error || 'Error al dar de alta', 'err');
@@ -75,7 +75,7 @@ function initAltaChofer() {
 
     if (res.ok) {
       App.toast((res.nombre || 'Chofer') + ' dado de alta', 'ok');
-      await Catalogos.cargar();
+      await Catalogos.cargar(true); // forzado: que el alta recién hecha se vea ya, no en 60s
       cerrar();
     } else {
       App.toast(res.error || 'Error al dar de alta', 'err');

@@ -1,13 +1,19 @@
 // catalogos.js — Carga y caché de catálogos; poblado de selects; alta inline
 
+const CATALOGOS_CACHE_KEY = 'ip_catalogos_cache_v1';
+const CATALOGOS_CACHE_TTL_MS = 60000; // 60s — cada página (distribución/tráfico/personal/...) hace un reload completo, así que sin esto se repite la llamada al backend en cada navegación.
+
 const Catalogos = {
   predios:   [],
   unidades:  [],
   servicios: [],
   choferes:  [],
 
-  // ── Carga desde la API (una vez por sesión) ──────────────────
-  async cargar() {
+  // ── Carga desde la API, con caché corta en sessionStorage ─────
+  // forzar=true ignora el caché (usarlo después de un alta, para ver el dato nuevo ya mismo).
+  async cargar(forzar = false) {
+    if (!forzar && this._cargarDesdeCache()) return;
+
     const res = await api('getCatalogos');
     if (!res.ok) { App.toast('Error al cargar catálogos: ' + res.error, 'err'); return; }
     this.predios   = res.predios   || [];
@@ -15,6 +21,33 @@ const Catalogos = {
     this.servicios = res.servicios || [];
     this.choferes  = res.choferes  || [];
     this.poblarSelects();
+
+    try {
+      sessionStorage.setItem(CATALOGOS_CACHE_KEY, JSON.stringify({
+        ts: Date.now(),
+        predios: this.predios, unidades: this.unidades,
+        servicios: this.servicios, choferes: this.choferes,
+      }));
+    } catch (e) { /* sessionStorage lleno/deshabilitado — no rompe la carga */ }
+  },
+
+  // Devuelve true si pudo poblar desde un caché todavía vigente (< 60s).
+  _cargarDesdeCache() {
+    try {
+      const raw = sessionStorage.getItem(CATALOGOS_CACHE_KEY);
+      if (!raw) return false;
+      const cached = JSON.parse(raw);
+      if (!cached || (Date.now() - cached.ts) >= CATALOGOS_CACHE_TTL_MS) return false;
+
+      this.predios   = cached.predios   || [];
+      this.unidades  = cached.unidades  || [];
+      this.servicios = cached.servicios || [];
+      this.choferes  = cached.choferes  || [];
+      this.poblarSelects();
+      return true;
+    } catch (e) {
+      return false;
+    }
   },
 
   // ── Poblar todos los selects de la app ───────────────────────
@@ -187,7 +220,7 @@ const Catalogos = {
   async altaUnidad(tipo, dominio, interno, flota, transportista, base) {
     const res = await api('altaUnidad', { tipo, dominio, interno, flota, transportista, baseHabitual: base });
     if (res.ok) {
-      await this.cargar(); // refrescar catálogos
+      await this.cargar(true); // refrescar catálogos (forzado: el alta recién hecha tiene que verse ya)
       App.toast('Unidad dada de alta: ' + dominio, 'ok');
     }
     return res;
@@ -197,7 +230,7 @@ const Catalogos = {
   async altaChofer(nombre, dni, transportista) {
     const res = await api('altaChofer', { nombre, dni, transportista });
     if (res.ok) {
-      await this.cargar();
+      await this.cargar(true);
       App.toast('Chofer dado de alta: ' + nombre, 'ok');
     }
     return res;

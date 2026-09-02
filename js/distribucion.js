@@ -1,6 +1,28 @@
 // distribucion.js — Formularios y lista de distribución
 
 const Distribucion = {
+  // ── Predio fijo cuando el vigilador solo tiene uno asignado ───
+  // Si el select de predio quedó con una sola opción disponible (el back ya filtra por
+  // Predio_Asignado en getCatalogos), no tiene sentido hacerlo elegir: se autoselecciona
+  // y se bloquea el campo. Si tiene más de un predio (supervisor/admin, o Predio_Asignado
+  // = TODOS), el selector queda editable como siempre.
+  aplicarPredioFijo() {
+    const sel = document.getElementById('sel-predio-dist');
+    if (!sel) return;
+    const opciones = Array.from(sel.options).filter(o => o.value !== '');
+    if (opciones.length !== 1) return;
+
+    const opt = opciones[0];
+    sel.value = opt.value;
+
+    const input = sel._comboInput;
+    if (!input) return;
+    input.value = opt.textContent;
+    input.disabled = true; // bloqueado del todo: no hay nada para elegir
+    const arrow = sel.closest('.combobox-wrap')?.querySelector('.combobox-arrow');
+    if (arrow) arrow.style.display = 'none';
+  },
+
   // ── Registrar ingreso ─────────────────────────────────────────
   async registrarIngreso(form) {
     const idPredio     = form.querySelector('#sel-predio-dist').value;
@@ -33,6 +55,7 @@ const Distribucion = {
         const s = document.getElementById(id);
         if (s && s._comboInput) s._comboInput.value = '';
       });
+      this.aplicarPredioFijo(); // form.reset() también pisa el predio bloqueado — re-fijarlo
       App.mostrar('dentro-dist');
     } else {
       App.toast(res.error, 'err');

@@ -200,7 +200,9 @@ document.addEventListener('DOMContentLoaded', () => {
   initDistribucion();
   initScanner();
   App.mostrar('distribucion');
-  Catalogos.cargar().catch(() => App.toast('No se pudieron cargar los catálogos', 'warn'));
+  Catalogos.cargar()
+    .then(() => Distribucion.aplicarPredioFijo())
+    .catch(() => App.toast('No se pudieron cargar los catálogos', 'warn'));
 });
 </script>
 </body>

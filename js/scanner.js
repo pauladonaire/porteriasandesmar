@@ -79,6 +79,12 @@ function initScanner() {
           sel.appendChild(opt);
           sel.value = unidad.ID_Unidad;
         }
+        // El select real quedó seteado, pero el combobox (input visible) no se entera solo —
+        // sin esto, el vigilador ve el campo vacío y termina escribiendo la patente de nuevo.
+        if (sel._comboInput) {
+          const opt = Array.from(sel.options).find(o => o.value === sel.value);
+          sel._comboInput.value = opt ? opt.textContent : unidad.Dominio;
+        }
       }
       reader.style.display = 'none';
       btnScan.textContent  = '📷 Escanear QR';
