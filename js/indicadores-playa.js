@@ -244,7 +244,8 @@ function dibujarChart(canvasId, labels, data, color, unidad) {
 document.addEventListener('DOMContentLoaded', () => {
   initTemaToggle(); // primero: el modo oscuro no depende de tener sesión activa
   if (!guardSesionTurnero()) return;
-  initSelectorDeposito(() => cargarTodo());
+  if (!exigirAccesoPagina('indicadores-playa')) return;
+  initSelectorDepositoRol(() => cargarTodo());
   initNavTurnero('indicadores-playa');
   initFiltrosFecha();
 

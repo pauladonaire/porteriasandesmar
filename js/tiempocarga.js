@@ -154,7 +154,8 @@ function dibujarStacked(canvasId, labels, carga, control) {
 document.addEventListener('DOMContentLoaded', () => {
   initTemaToggle(); // primero: el modo oscuro no depende de tener sesión activa
   if (!guardSesionTurnero()) return;
-  initSelectorDeposito(() => { cargarHoy(); cargarHistorico(); });
+  if (!exigirAccesoPagina('tiempodecarga')) return;
+  initSelectorDepositoRol(() => { cargarHoy(); cargarHistorico(); });
   initNavTurnero('tiempodecarga');
   setFechaHoy();
   initFiltrosHist();

@@ -34,6 +34,38 @@ function initSelectorDeposito(onCambio) {
   });
 }
 
+// Roles fijados a su propio depósito (columna Deposito_Turnero del usuario, MZA o
+// BUE) fuera del panel de Administración: no pueden cambiar de depósito desde el
+// selector en Playa/Turnos/Indicadores/Tiempo de Carga. El backend GAS de esas
+// pantallas no valida depósito por rol (a diferencia de Administración, gateada por
+// validarAdminDeposito_), así que este selector bloqueado es la única barrera real.
+const ROLES_DEPOSITO_FIJO = ['admin_deposito', 'operaciones', 'distribucion'];
+
+// Como initSelectorDeposito, pero si el rol está en ROLES_DEPOSITO_FIJO, oculta las
+// otras opciones y fuerza el depósito del usuario en vez de dejarlo elegir.
+function initSelectorDepositoRol(onCambio) {
+  const u = Sesion.obtener();
+  if (u && ROLES_DEPOSITO_FIJO.includes(u.Rol)) {
+    const dep = String(u.Deposito_Turnero || '').trim().toUpperCase();
+    const cont = document.getElementById('t-deposito-selector');
+    if (dep !== 'MZA' && dep !== 'BUE') {
+      toast('Tu usuario no tiene un depósito asignado (columna Deposito_Turnero en USUARIOS). Pedile al administrador que lo complete.', 'err', 6000);
+      if (typeof onCambio === 'function') onCambio(TurneroDeposito.obtener());
+      return;
+    }
+    TurneroDeposito.fijar(dep);
+    if (cont) {
+      cont.querySelectorAll('.t-dep-btn').forEach(btn => {
+        if (btn.dataset.dep !== dep) { btn.style.display = 'none'; }
+        else { btn.classList.add('activo'); btn.disabled = true; btn.style.cursor = 'default'; btn.style.opacity = '1'; }
+      });
+    }
+    if (typeof onCambio === 'function') onCambio(dep);
+    return;
+  }
+  initSelectorDeposito(onCambio);
+}
+
 // Páginas de turnero con acceso restringido por rol — el backend GAS vuelve a
 // validar esto en cada acción de todos modos, esto acá es solo para no mostrar el
 // botón/pantalla a quien no corresponde.
@@ -42,11 +74,31 @@ const PAGINAS_RESTRINGIDAS = {
   // 'fincarga' es pública (link sin login para celular) — no se restringe acá.
 };
 
+// Roles con acceso limitado a un subconjunto FIJO de pantallas — todo lo que no
+// esté en su lista (incluida Administración) queda oculto/bloqueado, sin importar
+// lo que diga PAGINAS_RESTRINGIDAS para esa pantalla puntual.
+const PAGINAS_PERMITIDAS_POR_ROL = {
+  'operaciones':  ['playa', 'tiempodecarga'],
+  'distribucion': ['playa', 'turnos'],
+};
+
 function rolPermitidoEnPagina(pagina) {
+  const u = Sesion.obtener();
+  const permitidasRol = u && PAGINAS_PERMITIDAS_POR_ROL[u.Rol];
+  if (permitidasRol) return permitidasRol.includes(pagina);
   const permitidos = PAGINAS_RESTRINGIDAS[pagina];
   if (!permitidos) return true; // página sin restricción
-  const u = Sesion.obtener();
   return !!u && permitidos.includes(u.Rol);
+}
+
+// Redirige a Playa en Vivo (la única pantalla que ven todos los roles) si el rol
+// actual no tiene la página actual en su lista permitida. Llamar justo después de
+// guardSesionTurnero(), antes de cargar datos de la página.
+function exigirAccesoPagina(paginaActual) {
+  if (rolPermitidoEnPagina(paginaActual)) return true;
+  toast('No tenés permiso para ver esta pantalla.', 'err');
+  window.location.href = 'playa.html';
+  return false;
 }
 
 function initNavTurnero(paginaActual) {

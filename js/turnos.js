@@ -253,7 +253,8 @@ function onCambioFecha() {
 document.addEventListener('DOMContentLoaded', async () => {
   initTemaToggle(); // primero: el modo oscuro no depende de tener sesión activa
   if (!guardSesionTurnero()) return;
-  initSelectorDeposito(() => { cargarCatalogos().then(cargarTurnosDelDia); });
+  if (!exigirAccesoPagina('turnos')) return;
+  initSelectorDepositoRol(() => { cargarCatalogos().then(cargarTurnosDelDia); });
   initNavTurnero('turnos');
   initAutocompletado();
 

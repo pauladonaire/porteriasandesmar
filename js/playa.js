@@ -225,7 +225,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initTemaToggle(); // primero: el modo oscuro no depende de tener sesión activa
   if (!guardSesionTurnero()) return;
   initReloj();
-  initSelectorDeposito(() => cargarTodo());
+  initSelectorDepositoRol(() => cargarTodo());
   initNavTurnero('playa');
   cargarTodo();
   setInterval(cargarTodo, REFRESH_MS);
