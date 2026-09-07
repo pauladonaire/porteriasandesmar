@@ -31,6 +31,28 @@ const App = {
   },
 };
 
+// Prefetch de "unidades adentro" — usa la MISMA clave que js/distribucion.js
+// (no se declara como const compartida para no chocar con esa declaración cuando
+// ambos scripts conviven en distribucion.html).
+function _prefetchDistribucionAbiertos() {
+  const CACHE_KEY = 'ip_dist_abiertos_cache';
+  try {
+    const raw = sessionStorage.getItem(CACHE_KEY);
+    if (raw) {
+      const cached = JSON.parse(raw);
+      if (cached && (Date.now() - cached.ts) < 20000) return; // ya está fresco, no hace falta
+    }
+  } catch (e) { /* seguimos e intentamos igual */ }
+
+  if (typeof api !== 'function') return;
+  api('distribucionAbiertos').then(res => {
+    if (!res || !res.ok) return;
+    try {
+      sessionStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), movimientos: res.movimientos || [] }));
+    } catch (e) { /* no crítico */ }
+  }).catch(() => {});
+}
+
 // NavPage: guard de sesión, topbar, bottom-nav, logout
 const NavPage = {
   init(paginaActual) {
@@ -48,6 +70,13 @@ const NavPage = {
       item.addEventListener('click', () => {
         const destino = item.dataset.pagina;
         if (destino === paginaActual) return;
+        // Prefetch best-effort: si vamos a Distribución, disparamos ya la llamada a
+        // distribucionAbiertos (sin esperarla) para que, si el teléfono/PC alcanza a
+        // responder antes de que la navegación tire la página vieja, distribucion.html
+        // encuentre el dato fresco en sessionStorage y no tenga que volver a pedirlo.
+        // Es "mejor esfuerzo": si la navegación gana la carrera, no pasa nada — la
+        // página de destino igual hace su propio pedido (ver js/distribucion.js).
+        if (destino === 'distribucion') _prefetchDistribucionAbiertos();
         window.location.href = destino === 'home' ? 'index.html' : destino + '.html';
       });
     });

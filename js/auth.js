@@ -7,6 +7,7 @@ const Auth = {
     if (res.ok) {
       Sesion.guardar(res.usuario);
       aplicarRol(res.usuario.Rol);
+      apiWarmup(); // ya logueado: adelantar el "despertar" de Apps Script antes del primer guardado
     }
     return res;
   },

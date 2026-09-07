@@ -1,7 +1,17 @@
 // catalogos.js — Carga y caché de catálogos; poblado de selects; alta inline
 
-const CATALOGOS_CACHE_KEY = 'ip_catalogos_cache_v1';
-const CATALOGOS_CACHE_TTL_MS = 60000; // 60s — cada página (distribución/tráfico/personal/...) hace un reload completo, así que sin esto se repite la llamada al backend en cada navegación.
+const CATALOGOS_CACHE_KEY = 'ip_catalogos_cache_v2'; // v2: ahora en localStorage (persiste entre páginas, no solo la pestaña)
+const CATALOGOS_CACHE_TTL_MS = 300000; // 5 min — los catálogos (predios/unidades/choferes) casi no cambian
+
+// localStorage con fallback a sessionStorage (por si está deshabilitado/bloqueado, ej. navegación privada).
+function _catalogosStorageGet() {
+  try { return localStorage.getItem(CATALOGOS_CACHE_KEY); } catch (e) { /* sigue abajo */ }
+  try { return sessionStorage.getItem(CATALOGOS_CACHE_KEY); } catch (e) { return null; }
+}
+function _catalogosStorageSet(value) {
+  try { localStorage.setItem(CATALOGOS_CACHE_KEY, value); return; } catch (e) { /* sigue abajo */ }
+  try { sessionStorage.setItem(CATALOGOS_CACHE_KEY, value); } catch (e) { /* ninguno disponible — no rompe la carga */ }
+}
 
 const Catalogos = {
   predios:   [],
@@ -9,7 +19,7 @@ const Catalogos = {
   servicios: [],
   choferes:  [],
 
-  // ── Carga desde la API, con caché corta en sessionStorage ─────
+  // ── Carga desde la API, con caché en localStorage (5 min) ─────
   // forzar=true ignora el caché (usarlo después de un alta, para ver el dato nuevo ya mismo).
   async cargar(forzar = false) {
     if (!forzar && this._cargarDesdeCache()) return;
@@ -22,19 +32,17 @@ const Catalogos = {
     this.choferes  = res.choferes  || [];
     this.poblarSelects();
 
-    try {
-      sessionStorage.setItem(CATALOGOS_CACHE_KEY, JSON.stringify({
-        ts: Date.now(),
-        predios: this.predios, unidades: this.unidades,
-        servicios: this.servicios, choferes: this.choferes,
-      }));
-    } catch (e) { /* sessionStorage lleno/deshabilitado — no rompe la carga */ }
+    _catalogosStorageSet(JSON.stringify({
+      ts: Date.now(),
+      predios: this.predios, unidades: this.unidades,
+      servicios: this.servicios, choferes: this.choferes,
+    }));
   },
 
-  // Devuelve true si pudo poblar desde un caché todavía vigente (< 60s).
+  // Devuelve true si pudo poblar desde un caché todavía vigente (< 5 min).
   _cargarDesdeCache() {
     try {
-      const raw = sessionStorage.getItem(CATALOGOS_CACHE_KEY);
+      const raw = _catalogosStorageGet();
       if (!raw) return false;
       const cached = JSON.parse(raw);
       if (!cached || (Date.now() - cached.ts) >= CATALOGOS_CACHE_TTL_MS) return false;

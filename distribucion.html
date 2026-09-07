@@ -88,6 +88,7 @@
   <div class="container list-section">
     <button class="btn-back" data-goto="distribucion">← Nueva operación</button>
     <div class="form-title">Unidades Adentro</div>
+    <div id="dist-actualizado" class="text-muted" style="font-size:.72rem;margin:-6px 0 10px"></div>
 
     <div class="dash-section-header" style="padding-left:0">
       <span class="dash-section-title">↑ Ingresos</span>
@@ -200,7 +201,15 @@ document.addEventListener('DOMContentLoaded', () => {
   initDistribucion();
   initScanner();
   App.mostrar('distribucion');
-  Catalogos.cargar()
+
+  // Catálogos y "unidades adentro" salen en paralelo (antes era secuencial) — el render
+  // de la lista espera a que los catálogos estén listos (nombre de predio de respaldo),
+  // pero el pedido a distribucionAbiertos ya sale desde el primer instante.
+  const catalogosListos = Catalogos.cargar();
+  Promise.all([
+    catalogosListos,
+    Distribucion.cargarLista(catalogosListos),
+  ])
     .then(() => Distribucion.aplicarPredioFijo())
     .catch(() => App.toast('No se pudieron cargar los catálogos', 'warn'));
 });

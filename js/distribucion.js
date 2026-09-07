@@ -1,5 +1,30 @@
 // distribucion.js — Formularios y lista de distribución
 
+// Caché de "unidades adentro" — 30s. Mismo key que usa el prefetch de js/nav.js
+// al hacer click en "Distribuc.", para que si llegó a tiempo no se vuelva a pedir.
+const DIST_ABIERTOS_CACHE_KEY = 'ip_dist_abiertos_cache';
+const DIST_ABIERTOS_CACHE_TTL_MS = 30000;
+
+function _distAbiertosLeerCache() {
+  try {
+    const raw = sessionStorage.getItem(DIST_ABIERTOS_CACHE_KEY);
+    if (!raw) return null;
+    const cached = JSON.parse(raw);
+    if (!cached || (Date.now() - cached.ts) >= DIST_ABIERTOS_CACHE_TTL_MS) return null;
+    return cached;
+  } catch (e) {
+    return null;
+  }
+}
+function _distAbiertosGuardarCache(movimientos) {
+  try {
+    sessionStorage.setItem(DIST_ABIERTOS_CACHE_KEY, JSON.stringify({ ts: Date.now(), movimientos }));
+  } catch (e) { /* no crítico */ }
+}
+function _distAbiertosInvalidarCache() {
+  try { sessionStorage.removeItem(DIST_ABIERTOS_CACHE_KEY); } catch (e) { /* no crítico */ }
+}
+
 const Distribucion = {
   // ── Predio fijo cuando el vigilador solo tiene uno asignado ───
   // Si el select de predio quedó con una sola opción disponible (el back ya filtra por
@@ -56,6 +81,7 @@ const Distribucion = {
         if (s && s._comboInput) s._comboInput.value = '';
       });
       this.aplicarPredioFijo(); // form.reset() también pisa el predio bloqueado — re-fijarlo
+      _distAbiertosInvalidarCache(); // el ingreso recién creado tiene que verse ya, no en 30s
       App.mostrar('dentro-dist');
     } else {
       App.toast(res.error, 'err');
@@ -66,21 +92,46 @@ const Distribucion = {
   async registrarEgreso(idMov, estadoCarga, detalleCarga, observaciones) {
     if (!estadoCarga) { App.toast('Indicá el estado de carga al egreso', 'err'); return; }
 
+    // Optimista: ocultar la tarjeta ya mismo, sin esperar la respuesta del servidor
+    // (los ~2-4s de ida y vuelta con Apps Script dejan de sentirse).
+    const card = Array.from(document.querySelectorAll('.mov-card'))
+      .find(c => c.dataset.idMov === idMov);
+    if (card) card.style.display = 'none';
+
     const res = await api('distribucionEgreso', { idMov, estadoCarga, detalleCarga, observaciones });
     if (res.ok) {
       App.toast('Egreso registrado — ' + res.horasDentro + 'h dentro', 'ok');
+      _distAbiertosInvalidarCache();
       this.cargarLista();
     } else {
       App.toast(res.error, 'err');
+      if (card) card.style.display = ''; // no se pudo cerrar — la unidad sigue adentro
     }
     return res;
   },
 
   // ── Cargar lista de abiertos ───────────────────────────────────
-  async cargarLista() {
-    const res = await api('distribucionAbiertos');
-    if (!res.ok) { App.toast('Error al cargar lista', 'err'); return; }
-    const movs      = res.movimientos || [];
+  // catalogosListos (opcional): promesa de Catalogos.cargar() en curso — si se pasa,
+  // el render espera a que resuelva (necesita Catalogos para el nombre de predio de
+  // respaldo), pero la llamada a distribucionAbiertos sale en paralelo, no después.
+  async cargarLista(catalogosListos) {
+    let movs, actualizadoTs;
+    const cache = _distAbiertosLeerCache();
+
+    if (cache) {
+      movs = cache.movimientos;
+      actualizadoTs = cache.ts;
+    } else {
+      const [res] = await Promise.all([
+        api('distribucionAbiertos'),
+        catalogosListos || Promise.resolve(),
+      ]);
+      if (!res.ok) { App.toast('Error al cargar lista', 'err'); return; }
+      movs = res.movimientos || [];
+      actualizadoTs = Date.now();
+      _distAbiertosGuardarCache(movs);
+    }
+
     const nocturnos = movs.filter(m => String(m.Tipo_Ingreso || '').toLowerCase() === 'nocturno');
     const normales  = movs.filter(m => String(m.Tipo_Ingreso || '').toLowerCase() !== 'nocturno');
 
@@ -95,6 +146,12 @@ const Distribucion = {
     // Actualizar badge (total, incluye ambos)
     const badge = document.getElementById('badge-dist');
     if (badge) badge.textContent = movs.length + ' dentro';
+
+    const actEl = document.getElementById('dist-actualizado');
+    if (actEl) {
+      const seg = Math.max(0, Math.round((Date.now() - actualizadoTs) / 1000));
+      actEl.textContent = seg <= 1 ? 'Actualizado recién' : 'Actualizado hace ' + seg + 's';
+    }
   },
 
   renderizarLista(movs, containerId) {
@@ -113,7 +170,7 @@ const Distribucion = {
       const predio = m.Nombre_Predio || Catalogos.nombrePredio(m.ID_Predio);
       const dominioLbl = (m.Dominio || m.ID_Unidad) + (m.Interno ? ' [' + m.Interno + ']' : '');
       return `
-        <div class="mov-card ingreso-border">
+        <div class="mov-card ingreso-border" data-id-mov="${m.ID_Mov}">
           <div class="mov-card-header">
             <span class="mov-card-id">${dominioLbl}</span>
             <span class="tag tag-abierto">↑ ${horas}</span>

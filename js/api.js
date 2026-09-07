@@ -58,3 +58,12 @@ async function api(accion, payload = {}) {
     return { ok: false, error: 'Sin conexión o error de red: ' + err.message };
   }
 }
+
+/**
+ * "Despierta" la Web App de Apps Script apenas arranca la app, para que el primer
+ * guardado real del usuario (ingreso/egreso, etc.) no pague el costo de arranque frío.
+ * Silenciosa: nunca muestra error ni bloquea nada — es pura optimización, best-effort.
+ */
+function apiWarmup() {
+  api('ping').catch(() => {});
+}

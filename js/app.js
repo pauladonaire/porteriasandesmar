@@ -93,6 +93,9 @@ const App = {
         if (!Sesion.activo()) return;
         const destino = item.dataset.pagina;
         if (destino === 'home') { this.mostrar('home'); return; }
+        // Prefetch best-effort (mismo mecanismo que js/nav.js): adelanta el pedido de
+        // "unidades adentro" antes de navegar, por si llega a tiempo.
+        if (destino === 'distribucion') _prefetchDistribucionAbiertosDesdeHome();
         window.location.href = destino + '.html';
       });
     });
@@ -106,6 +109,7 @@ const App = {
 
     // Verificar sesión existente al cargar
     if (Auth.verificar()) {
+      apiWarmup();
       const u = Sesion.obtener();
       document.getElementById('topbar-user').textContent = u.Nombre_Apellido;
       const predio = u.Predio_Asignado === 'TODOS' ? 'Todos los predios' : u.Predio_Asignado;
@@ -120,6 +124,27 @@ const App = {
 };
 
 document.addEventListener('DOMContentLoaded', () => App.init());
+
+// Prefetch de "unidades adentro" al navegar a Distribución desde Home — mismo caché
+// que usa js/distribucion.js (index.html no carga js/nav.js, por eso está duplicado acá).
+function _prefetchDistribucionAbiertosDesdeHome() {
+  const CACHE_KEY = 'ip_dist_abiertos_cache';
+  try {
+    const raw = sessionStorage.getItem(CACHE_KEY);
+    if (raw) {
+      const cached = JSON.parse(raw);
+      if (cached && (Date.now() - cached.ts) < 20000) return;
+    }
+  } catch (e) { /* seguimos e intentamos igual */ }
+
+  if (typeof api !== 'function') return;
+  api('distribucionAbiertos').then(res => {
+    if (!res || !res.ok) return;
+    try {
+      sessionStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), movimientos: res.movimientos || [] }));
+    } catch (e) { /* no crítico */ }
+  }).catch(() => {});
+}
 
 // ── Helpers de formato ────────────────────────────────────────
 
