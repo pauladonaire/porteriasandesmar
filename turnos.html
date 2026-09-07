@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#1e40af">
+  <title>Turnos — Turnero</title>
+  <link rel="icon" href="data:,">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/turnero.css">
+</head>
+<body>
+
+<div class="t-page">
+
+  <header class="t-header">
+    <div>
+      <div class="t-header-title">Turnos</div>
+      <div class="t-header-sub">Turnero</div>
+    </div>
+    <div class="t-header-right">
+      <div class="t-deposito-selector" id="t-deposito-selector">
+        <button type="button" class="t-dep-btn" data-dep="MZA">MZA</button>
+        <button type="button" class="t-dep-btn" data-dep="BUE">BUE</button>
+      </div>
+      <button type="button" class="t-tema-btn" id="btn-toggle-tema" title="Cambiar tema">🌙</button>
+      <a href="index.html" class="t-tema-btn" style="text-decoration:none">← Portería</a>
+    </div>
+  </header>
+
+  <nav class="t-nav">
+    <button class="t-nav-btn" data-pagina="playa">Playa en Vivo</button>
+    <button class="t-nav-btn activo" data-pagina="turnos">Turnos</button>
+    <button class="t-nav-btn" data-pagina="indicadores-playa">Indicadores</button>
+    <button class="t-nav-btn" data-pagina="tiempodecarga">Tiempo de Carga</button>
+    <button class="t-nav-btn" data-pagina="admin-turnero">Administración</button>
+    <button class="t-nav-btn" data-pagina="fincarga">Fin de Carga</button>
+  </nav>
+
+  <div class="t-filtros">
+    <div class="t-field">
+      <label class="t-label">Fecha</label>
+      <input type="date" class="t-input" id="in-fecha-turnos">
+    </div>
+    <button type="button" class="t-btn ghost" id="btn-hoy">Hoy</button>
+    <button type="button" class="t-btn primary" id="btn-whatsapp">📲 Enviar por WhatsApp</button>
+  </div>
+
+  <div class="t-resumen" id="t-resumen-disponibilidad">Cargando disponibilidad…</div>
+
+  <div class="t-cols-2">
+
+    <div class="t-form-card">
+      <div class="t-form-title">➕ Cargar turno</div>
+      <form id="form-cargar-turno">
+        <div class="t-field">
+          <label class="t-label">Fletero</label>
+          <input class="t-input" id="in-fletero" list="dl-fleteros" autocomplete="off" required>
+          <datalist id="dl-fleteros"></datalist>
+        </div>
+        <div class="t-field">
+          <label class="t-label">Patente</label>
+          <input class="t-input" id="in-patente" list="dl-patentes" autocomplete="off">
+          <datalist id="dl-patentes"></datalist>
+        </div>
+        <div class="t-field">
+          <label class="t-label">Horario</label>
+          <select class="t-select" id="sel-horario" required></select>
+        </div>
+        <div class="t-field">
+          <label class="t-label">Box</label>
+          <select class="t-select" id="sel-box" required></select>
+        </div>
+        <div class="t-error-msg t-hidden" id="err-cargar-turno"></div>
+        <button type="submit" class="t-btn primary" style="width:100%">Asignar turno</button>
+      </form>
+    </div>
+
+    <div class="t-form-card">
+      <div class="t-form-title">📋 Turnos del día</div>
+      <div id="turnos-agrupados"></div>
+      <div class="t-empty t-hidden" id="empty-turnos">No hay turnos cargados para esta fecha.</div>
+    </div>
+
+  </div>
+
+</div>
+
+<!-- Modal editar/liberar turno -->
+<div class="t-modal-overlay t-hidden" id="modal-turno">
+  <div class="t-modal">
+    <div class="t-modal-title">Editar turno</div>
+    <div class="t-field">
+      <label class="t-label">Horario / Box</label>
+      <div id="modal-turno-meta" style="font-size:.85rem;color:var(--t-text-muted)"></div>
+    </div>
+    <div class="t-field">
+      <label class="t-label">Fletero</label>
+      <input class="t-input" id="modal-in-fletero">
+    </div>
+    <div class="t-field">
+      <label class="t-label">Patente</label>
+      <input class="t-input" id="modal-in-patente">
+    </div>
+    <div class="t-error-msg t-hidden" id="modal-error"></div>
+    <div class="t-modal-actions">
+      <button type="button" class="t-btn danger" id="btn-liberar-turno">Liberar</button>
+      <button type="button" class="t-btn ghost" id="btn-cancelar-modal">Cancelar</button>
+      <button type="button" class="t-btn primary" id="btn-guardar-turno">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast-container" style="position:fixed;bottom:16px;left:50%;transform:translateX(-50%);z-index:1000;display:flex;flex-direction:column;gap:8px;align-items:center"></div>
+
+<script src="js/api.js"></script>
+<script src="js/api-turnero.js"></script>
+<script src="js/turnero-common.js"></script>
+<script src="js/turnos.js"></script>
+</body>
+</html>

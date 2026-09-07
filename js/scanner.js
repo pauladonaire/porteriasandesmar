@@ -86,6 +86,7 @@ function initScanner() {
           sel._comboInput.value = opt ? opt.textContent : unidad.Dominio;
         }
       }
+      if (typeof Distribucion !== 'undefined') Distribucion.preseleccionarChofer(unidad);
       reader.style.display = 'none';
       btnScan.textContent  = '📷 Escanear QR';
       App.toast('Unidad cargada: ' + unidad.Dominio, 'ok');

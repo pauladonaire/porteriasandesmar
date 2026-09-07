@@ -48,6 +48,29 @@ const Distribucion = {
     if (arrow) arrow.style.display = 'none';
   },
 
+  // ── Preseleccionar chofer desde el dato de Drivin (Chofer_Drivin de UNIDADES) ──
+  // Igual idea que aplicarPredioFijo(): si ya sabemos el chofer habitual de esa unidad
+  // (columna J de UNIDADES, sincronizada desde Drivin), se lo dejamos precargado para
+  // que el vigilador no tenga que buscarlo — pero sin bloquear el campo, porque el
+  // chofer real puede cambiar de un viaje a otro. Si no matchea ningún chofer del
+  // catálogo, se agrega como opción temporal (mismo patrón que scanner.js con la unidad).
+  preseleccionarChofer(unidad) {
+    const nombre = String(unidad?.Chofer_Drivin || '').trim();
+    if (!nombre) return;
+    const sel = document.getElementById('sel-chofer-dist');
+    if (!sel) return;
+
+    let opt = Array.from(sel.options).find(o => o.value === nombre);
+    if (!opt) {
+      opt = document.createElement('option');
+      opt.value = nombre;
+      opt.textContent = nombre;
+      sel.appendChild(opt);
+    }
+    sel.value = nombre;
+    if (sel._comboInput) sel._comboInput.value = nombre;
+  },
+
   // ── Registrar ingreso ─────────────────────────────────────────
   async registrarIngreso(form) {
     const idPredio     = form.querySelector('#sel-predio-dist').value;
@@ -230,4 +253,10 @@ function initDistribucion() {
   Catalogos.initCombobox('sel-predio-dist',  'Buscar predio…');
   Catalogos.initCombobox('sel-unidad-dist',  'Buscar unidad o dominio…');
   Catalogos.initCombobox('sel-chofer-dist',  'Buscar chofer por nombre…');
+
+  // Elegir una unidad manualmente (no por QR) también preselecciona su chofer habitual
+  document.getElementById('sel-unidad-dist').addEventListener('change', e => {
+    const unidad = Catalogos.unidades.find(u => u.ID_Unidad === e.target.value);
+    Distribucion.preseleccionarChofer(unidad);
+  });
 }
