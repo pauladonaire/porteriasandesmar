@@ -1,6 +1,8 @@
 // personal.js — Formularios y lista de personal (visitas/clientes/proveedores)
 
 const Personal = {
+  _movs: [], // última lista completa recibida del server, para filtrar sin volver a pedirla
+
   // ── Registrar ingreso ─────────────────────────────────────────
   async registrarIngreso(form) {
     const idPredio     = form.querySelector('#sel-predio-pers').value;
@@ -54,21 +56,44 @@ const Personal = {
     return res;
   },
 
+  // Egreso de un toque, sin pasar por el modal — para el caso común (sin novedad
+  // que cargar). El botón "+ Observación" de la tarjeta sigue abriendo el modal.
+  async egresoDirecto(idMov, btnEl) {
+    if (btnEl) { btnEl.disabled = true; btnEl.innerHTML = '<span class="spinner"></span>'; }
+    await this.registrarEgreso(idMov, '');
+  },
+
   // ── Cargar lista de abiertos ───────────────────────────────────
   async cargarLista() {
     const res = await api('personalAbiertos');
     if (!res.ok) { App.toast('Error al cargar lista de personal', 'err'); return; }
-    this.renderizarLista(res.movimientos || []);
+    this._movs = res.movimientos || [];
+    const buscar = document.getElementById('buscar-pers');
+    if (buscar) this.filtrar(buscar.value);
+    else this.renderizarLista(this._movs);
     const badge = document.getElementById('badge-pers');
-    if (badge) badge.textContent = (res.movimientos || []).length + ' adentro';
+    if (badge) badge.textContent = this._movs.length + ' adentro';
   },
 
-  renderizarLista(movs) {
+  // Filtra la última lista recibida (sin volver a pedirla al server) por nombre o DNI
+  filtrar(query) {
+    const q = String(query || '').trim().toLowerCase();
+    if (!q) { this.renderizarLista(this._movs, false); return; }
+    const filtrados = this._movs.filter(m =>
+      String(m.Nombre_Apellido || '').toLowerCase().includes(q) ||
+      String(m.DNI || '').toLowerCase().includes(q)
+    );
+    this.renderizarLista(filtrados, true);
+  },
+
+  renderizarLista(movs, filtroActivo = false) {
     const container = document.getElementById('lista-pers');
     if (!container) return;
 
     if (!movs.length) {
-      container.innerHTML = '<div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><p>Sin personas adentro</p></div>';
+      container.innerHTML = filtroActivo
+        ? '<div class="empty"><p>Nadie coincide con la búsqueda</p></div>'
+        : '<div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><p>Sin personas adentro</p></div>';
       return;
     }
 
@@ -77,6 +102,7 @@ const Personal = {
       const predio = Catalogos.nombrePredio(m.ID_Predio);
       const mat    = m.Matricula === 'a pie' ? '🚶 a pie' : '🚗 ' + m.Matricula;
       const tipoBadge = { visita: '👤 Visita', cliente: '🛒 Cliente', proveedor: '🔧 Proveedor' };
+      const nombreEsc = m.Nombre_Apellido.replace(/'/g, "\\'");
       return `
         <div class="mov-card pers-border">
           <div class="mov-card-header">
@@ -88,9 +114,12 @@ const Personal = {
             DNI: <strong>${m.DNI || '—'}</strong> &nbsp; ${mat}
           </div>
           <div class="mov-card-detail"><strong>Predio:</strong> ${predio} &nbsp; ${m.FechaHora_Ingreso}</div>
-          <div class="btn-row" style="margin-top:8px">
-            <button class="btn btn-egreso btn-sm" onclick="abrirEgresioPersModal('${m.ID_Mov}','${m.Nombre_Apellido.replace(/'/g,"\'")}')">
+          <div class="btn-row" style="margin-top:8px;gap:8px">
+            <button class="btn btn-egreso btn-sm" onclick="Personal.egresoDirecto('${m.ID_Mov}', this)">
               ↓ Registrar Egreso
+            </button>
+            <button type="button" class="btn btn-outline btn-sm" style="width:auto" onclick="abrirEgresioPersModal('${m.ID_Mov}','${nombreEsc}')">
+              + Observación
             </button>
           </div>
         </div>`;
@@ -143,4 +172,9 @@ function initPersonal() {
 
   // Select con búsqueda predictiva
   Catalogos.initCombobox('sel-predio-pers', 'Buscar predio…');
+
+  // Buscador de "Personas Adentro" (filtra en memoria, sin volver a pedir al server)
+  document.getElementById('buscar-pers')?.addEventListener('input', e => {
+    Personal.filtrar(e.target.value);
+  });
 }

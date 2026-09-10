@@ -3,6 +3,7 @@
 const Scanner = {
   instance: null,
   activo: false,
+  linternaPrendida: false,
 
   /**
    * Inicia la cámara en el contenedor #qr-reader y llama a onResult(idUnidad) al leer.
@@ -15,7 +16,16 @@ const Scanner = {
 
     try {
       this.instance = new Html5Qrcode('qr-reader');
-      const config  = { fps: 10, qrbox: { width: 220, height: 220 } };
+      const config = {
+        fps: 15,                             // antes 10 — más fotogramas/seg, detecta más rápido
+        qrbox: { width: 250, height: 250 },   // recuadro más grande, más margen para encuadrar
+        aspectRatio: 1.0,
+        disableFlip: false,
+        // Si el celular soporta el detector nativo del navegador (Chrome/Android en su
+        // mayoría), lo usa en vez del decoder JS puro — mucho más rápido y confiable.
+        // Si no lo soporta, cae solo al decoder normal, sin romper nada.
+        experimentalFeatures: { useBarCodeDetectorIfSupported: true },
+      };
 
       await this.instance.start(
         { facingMode: 'environment' },
@@ -39,10 +49,27 @@ const Scanner = {
     }
   },
 
+  // Prende/apaga la linterna del celular mientras la cámara está activa — útil en la
+  // garita de noche. No todos los celulares/navegadores lo permiten; si falla, avisa
+  // y no rompe el escaneo.
+  async alternarLinterna() {
+    if (!this.instance || !this.activo) return null;
+    const nuevoEstado = !this.linternaPrendida;
+    try {
+      await this.instance.applyVideoConstraints({ advanced: [{ torch: nuevoEstado }] });
+      this.linternaPrendida = nuevoEstado;
+      return this.linternaPrendida;
+    } catch (err) {
+      App.toast('Este celular no permite prender la linterna desde acá', 'warn');
+      return null;
+    }
+  },
+
   detener() {
     if (this.instance && this.activo) {
       this.instance.stop().catch(() => {});
       this.activo = false;
+      this.linternaPrendida = false;
     }
   },
 };
@@ -52,7 +79,8 @@ const Scanner = {
  * Al leer un QR, precarga el select de unidad y los campos de dominio.
  */
 function initScanner() {
-  const btnScan = document.getElementById('btn-scan-qr');
+  const btnScan  = document.getElementById('btn-scan-qr');
+  const btnTorch = document.getElementById('btn-scan-linterna');
   if (!btnScan) return;
 
   btnScan.addEventListener('click', () => {
@@ -61,10 +89,12 @@ function initScanner() {
       Scanner.detener();
       reader.style.display = 'none';
       btnScan.textContent = '📷 Escanear QR';
+      if (btnTorch) { btnTorch.hidden = true; btnTorch.textContent = '🔦 Linterna'; }
       return;
     }
     reader.style.display = 'block';
     btnScan.textContent  = '✕ Cancelar escáner';
+    if (btnTorch) btnTorch.hidden = false;
 
     Scanner.iniciar(unidad => {
       // Precargar el select de unidad
@@ -89,7 +119,13 @@ function initScanner() {
       if (typeof Distribucion !== 'undefined') Distribucion.preseleccionarChofer(unidad);
       reader.style.display = 'none';
       btnScan.textContent  = '📷 Escanear QR';
+      if (btnTorch) { btnTorch.hidden = true; btnTorch.textContent = '🔦 Linterna'; }
       App.toast('Unidad cargada: ' + unidad.Dominio, 'ok');
     });
+  });
+
+  btnTorch?.addEventListener('click', async () => {
+    const prendida = await Scanner.alternarLinterna();
+    if (prendida !== null) btnTorch.textContent = prendida ? '🔦 Apagar linterna' : '🔦 Linterna';
   });
 }
