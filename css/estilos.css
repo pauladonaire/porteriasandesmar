@@ -134,21 +134,8 @@ button, input, select, textarea { font-family: inherit; }
 body[data-rol="supervisor"] .nav-item[data-rol-min="supervisor"],
 body[data-rol="admin"]      .nav-item[data-rol-min="supervisor"] { display: flex; }
 
-/* data-rol-min="admin" quedó con ese nombre por compatibilidad, pero hoy solo gatea
-   "Unidades QR" — pantalla de solo lectura para imprimir QR, por eso la ven también
-   supervisor y los roles del Turnero (admin_deposito/operaciones/distribucion). */
 .nav-item[data-rol-min="admin"] { display: none; }
-body[data-rol="admin"]           .nav-item[data-rol-min="admin"],
-body[data-rol="supervisor"]      .nav-item[data-rol-min="admin"],
-body[data-rol="admin_deposito"]  .nav-item[data-rol-min="admin"],
-body[data-rol="operaciones"]     .nav-item[data-rol-min="admin"],
-body[data-rol="distribucion"]    .nav-item[data-rol-min="admin"] { display: flex; }
-
-/* Roles enfocados en el Turnero: sin ingreso/egreso de Portería (Distribución,
-   Tráfico, Personal) ni el dashboard operativo del home — solo Unidades QR y Turnero. */
-body[data-rol="admin_deposito"] [data-rol-oculto="porteria-restringida"],
-body[data-rol="operaciones"]    [data-rol-oculto="porteria-restringida"],
-body[data-rol="distribucion"]   [data-rol-oculto="porteria-restringida"] { display: none !important; }
+body[data-rol="admin"] .nav-item[data-rol-min="admin"] { display: flex; }
 
 /* ── Cards de tipo (home) ───────────────────────────────────── */
 .home-grid {

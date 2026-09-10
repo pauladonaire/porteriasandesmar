@@ -53,23 +53,11 @@ function _prefetchDistribucionAbiertos() {
   }).catch(() => {});
 }
 
-// Roles enfocados en el Turnero: no operan ingreso/egreso de Portería, solo ven
-// Unidades QR (para imprimir). Si entran a estas páginas por URL directa, se los
-// manda de vuelta al home (el backend igual les rechaza cualquier acción vía
-// puedeOperarPredio_, pero así ni ven el formulario).
-const ROLES_SIN_PORTERIA = ['admin_deposito', 'operaciones', 'distribucion'];
-const PAGINAS_PORTERIA_RESTRINGIDA = ['distribucion', 'trafico', 'personal'];
-
 // NavPage: guard de sesión, topbar, bottom-nav, logout
 const NavPage = {
   init(paginaActual) {
     const u = Sesion.obtener();
     if (!u) { window.location.href = 'index.html'; return; }
-
-    if (ROLES_SIN_PORTERIA.includes(u.Rol) && PAGINAS_PORTERIA_RESTRINGIDA.includes(paginaActual)) {
-      window.location.href = 'index.html';
-      return;
-    }
 
     aplicarRol(u.Rol);
     document.getElementById('topbar-user').textContent = u.Nombre_Apellido;

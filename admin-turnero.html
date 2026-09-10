@@ -17,7 +17,7 @@
   <header class="t-header">
     <div>
       <div class="t-header-title">Administración</div>
-      <div class="t-header-sub">Boxes · Horarios · Fleteros</div>
+      <div class="t-header-sub">Boxes · Horarios · Operarios</div>
     </div>
     <div class="t-header-right">
       <div class="t-deposito-selector" id="t-deposito-selector">
@@ -76,22 +76,12 @@
 
     </div>
 
-    <!-- Fleteros -->
+    <!-- Fleteros: ya no se administran acá -->
     <div class="t-form-card" style="margin:0 16px 16px">
-      <div class="t-form-title">🚚 Maestro de fleteros</div>
-      <div id="lista-fleteros"></div>
-      <div class="t-empty t-hidden" id="empty-fleteros">No hay fleteros cargados.</div>
-      <form id="form-agregar-fletero" class="t-mt" style="display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap">
-        <div class="t-field" style="margin-bottom:0;flex:1;min-width:160px">
-          <label class="t-label">Nombre</label>
-          <input class="t-input" id="in-nuevo-fletero-nombre" required>
-        </div>
-        <div class="t-field" style="margin-bottom:0;flex:1;min-width:120px">
-          <label class="t-label">Patente (opcional)</label>
-          <input class="t-input" id="in-nuevo-fletero-patente">
-        </div>
-        <button type="submit" class="t-btn primary">Agregar</button>
-      </form>
+      <div class="t-form-title">🚚 Fleteros</div>
+      <div class="t-resumen" style="padding:0 0 8px">
+        El listado de fleteros sale directo del catálogo de Unidades de Portería (nombre del chofer sincronizado desde Drivin, o transportista/dominio si no hay chofer cargado). No hace falta darlos de alta acá — para agregar o corregir uno, se actualiza en Unidades.
+      </div>
     </div>
 
     <!-- Operarios de fin de carga -->

@@ -137,74 +137,6 @@ async function onAgregarHorario(e) {
   else toast((res && res.error) || 'No se pudo agregar', 'err');
 }
 
-// ── Fleteros ──
-
-async function cargarFleteros() {
-  const res = await apiTurnero('getMaestroFleteros');
-  const fleteros = (res && res.ok) ? res.data.fleteros : [];
-  const cont = document.getElementById('lista-fleteros');
-  const empty = document.getElementById('empty-fleteros');
-  cont.innerHTML = '';
-  empty.classList.toggle('t-hidden', fleteros.length > 0);
-  fleteros.forEach(f => cont.appendChild(crearFilaFletero(f)));
-  if (!res || !res.ok) toast((res && res.error) || 'No se pudo cargar el maestro de fleteros', 'err');
-}
-
-function crearFilaFletero(f) {
-  const activo = String(f.estado).toLowerCase() === 'activo';
-  const div = document.createElement('div');
-  div.className = 't-turno-row';
-  div.style.justifyContent = 'space-between';
-  div.innerHTML = `<span class="t-turno-name">${escapeHtml(f.nombre)}</span>` +
-    `<span class="t-turno-pat">${escapeHtml(f.patente || '')}</span>` +
-    `<span class="t-badge-estado ${activo ? 'badge-a-tiempo' : 'badge-no-a-cargar'}">${activo ? 'Activo' : 'Inactivo'}</span>`;
-
-  const acciones = document.createElement('span');
-  acciones.style.cssText = 'display:flex;gap:6px';
-
-  const btnEditar = document.createElement('button');
-  btnEditar.type = 'button';
-  btnEditar.className = 't-btn ghost';
-  btnEditar.textContent = 'Editar';
-  btnEditar.addEventListener('click', async () => {
-    const nuevoNombre = prompt('Nombre del fletero:', f.nombre);
-    if (nuevoNombre === null) return;
-    const nuevaPatente = prompt('Patente (opcional):', f.patente || '');
-    if (nuevaPatente === null) return;
-    if (!nuevoNombre.trim()) { toast('El nombre no puede quedar vacío', 'err'); return; }
-    const res = await apiTurnero('editarFletero', { fila: f.fila, nombre: nuevoNombre.trim(), patente: nuevaPatente.trim() });
-    if (res && res.ok) { toast('Fletero actualizado', 'ok'); cargarFleteros(); }
-    else toast((res && res.error) || 'No se pudo actualizar', 'err');
-  });
-
-  const btnToggle = document.createElement('button');
-  btnToggle.type = 'button';
-  btnToggle.className = 't-btn ghost';
-  btnToggle.textContent = activo ? 'Desactivar' : 'Activar';
-  btnToggle.addEventListener('click', async () => {
-    const res = await apiTurnero('setEstadoFletero', { fila: f.fila, estado: activo ? 'Inactivo' : 'Activo' });
-    if (res && res.ok) { toast('Fletero actualizado', 'ok'); cargarFleteros(); }
-    else toast((res && res.error) || 'No se pudo actualizar', 'err');
-  });
-
-  acciones.appendChild(btnEditar);
-  acciones.appendChild(btnToggle);
-  div.appendChild(acciones);
-  return div;
-}
-
-async function onAgregarFletero(e) {
-  e.preventDefault();
-  const inNombre  = document.getElementById('in-nuevo-fletero-nombre');
-  const inPatente = document.getElementById('in-nuevo-fletero-patente');
-  const nombre  = inNombre.value.trim();
-  const patente = inPatente.value.trim();
-  if (!nombre) return;
-  const res = await apiTurnero('agregarFletero', { nombre, patente });
-  if (res && res.ok) { toast('Fletero agregado', 'ok'); inNombre.value = ''; inPatente.value = ''; cargarFleteros(); }
-  else toast((res && res.error) || 'No se pudo agregar', 'err');
-}
-
 // ── Operarios (fin de carga) ──
 
 async function cargarOperarios() {
@@ -272,7 +204,6 @@ async function onAgregarOperario(e) {
 function cargarTodo() {
   cargarBoxes();
   cargarHorarios();
-  cargarFleteros();
   cargarOperarios();
 }
 
@@ -284,7 +215,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   document.getElementById('form-agregar-box').addEventListener('submit', onAgregarBox);
   document.getElementById('form-agregar-horario').addEventListener('submit', onAgregarHorario);
-  document.getElementById('form-agregar-fletero').addEventListener('submit', onAgregarFletero);
   document.getElementById('form-agregar-operario').addEventListener('submit', onAgregarOperario);
 
   cargarTodo();
