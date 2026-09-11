@@ -1,7 +1,7 @@
 // turnos.js — Pantalla "Turnos" (asignación de turnos de carga)
-// Nota: no hay pantalla de administración de boxes/horarios/fleteros — según la
-// especificación original, esas 3 tablas se editan a mano directamente en el Sheet
-// (Box_De_Carga / Horarios_Turno / Maestro_Fleteros), no hace falta UI para eso.
+// Nota: Boxes y Horarios se editan a mano directamente en el Sheet (Box_De_Carga /
+// Horarios_Turno), no hay pantalla de administración para esas 2 tablas. Fleteros ya
+// no es una tabla manual — sale directo de UNIDADES de portería (ver getFleteros_).
 
 let fechaActual = fechaHoyDDMMYYYY();
 let fleteros = [];
