@@ -108,7 +108,7 @@
 const ROLES_UNIDADES_QR = ['admin', 'supervisor', 'admin_deposito', 'operaciones', 'distribucion'];
 document.addEventListener('DOMContentLoaded', () => {
   const u = Sesion.obtener();
-  if (!u || !ROLES_UNIDADES_QR.includes(u.Rol)) { window.location.href = 'index.html'; return; }
+  if (!u || !ROLES_UNIDADES_QR.includes(rolEfectivo())) { window.location.href = 'index.html'; return; }
   NavPage.init('unidades');
   initUnidades();
   App.mostrar('unidades');
