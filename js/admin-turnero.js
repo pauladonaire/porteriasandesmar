@@ -3,9 +3,10 @@
 // leído de la columna Deposito_Turnero del usuario en USUARIOS de portería).
 // El backend GAS vuelve a validar esto en cada acción — esto acá es solo UI.
 
-function verificarAcceso() {
+async function verificarAcceso() {
   const u = Sesion.obtener();
-  const rol = u && u.Rol;
+  const rol = rolEfectivo();
+  const simulando = u && rol !== u.Rol; // admin "viendo como" otro rol
   const contenido = document.getElementById('t-admin-contenido');
   const denegado  = document.getElementById('t-acceso-denegado');
 
@@ -17,21 +18,36 @@ function verificarAcceso() {
   }
 
   if (rol === 'admin_deposito') {
-    const dep = String(u.Deposito_Turnero || '').trim().toUpperCase();
-    if (dep !== 'MZA' && dep !== 'BUE') {
+    await pintarBotonesDeposito_();
+    // Al simular, el admin real no tiene por qué tener Deposito_Turnero cargado
+    // — se usa el depósito ya elegido en el selector en vez de exigirle ese campo.
+    // Deposito_Turnero puede tener uno o varios depósitos separados por coma.
+    const permitidos = simulando ? [TurneroDeposito.obtener()] : depositosDeUsuario(u && u.Deposito_Turnero);
+    if (!permitidos.length) {
       contenido.style.display = 'none';
       denegado.textContent = 'Tu usuario no tiene un depósito asignado (columna Deposito_Turnero en USUARIOS). Pedile al administrador que lo complete.';
       denegado.classList.remove('t-hidden');
       return false;
     }
-    TurneroDeposito.fijar(dep);
+    let dep = TurneroDeposito.obtener();
+    if (!permitidos.includes(dep)) { dep = permitidos[0]; TurneroDeposito.fijar(dep); }
     const cont = document.getElementById('t-deposito-selector');
     cont.querySelectorAll('.t-dep-btn').forEach(btn => {
-      if (btn.dataset.dep !== dep) { btn.style.display = 'none'; }
-      else { btn.classList.add('activo'); btn.disabled = true; btn.style.cursor = 'default'; btn.style.opacity = '1'; }
+      if (!permitidos.includes(btn.dataset.dep)) { btn.style.display = 'none'; return; }
+      btn.classList.toggle('activo', btn.dataset.dep === dep);
+      if (permitidos.length > 1) {
+        btn.addEventListener('click', () => {
+          if (btn.dataset.dep === TurneroDeposito.obtener()) return;
+          TurneroDeposito.fijar(btn.dataset.dep);
+          cont.querySelectorAll('.t-dep-btn').forEach(b => b.classList.toggle('activo', b === btn));
+          cargarTodo();
+        });
+      } else {
+        btn.disabled = true; btn.style.cursor = 'default'; btn.style.opacity = '1';
+      }
     });
   } else {
-    initSelectorDeposito(() => cargarTodo());
+    await initSelectorDeposito(() => cargarTodo());
   }
   return true;
 }
@@ -207,11 +223,11 @@ function cargarTodo() {
   cargarOperarios();
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   initTemaToggle(); // primero: el modo oscuro no depende de tener sesión activa
   if (!guardSesionTurnero()) return;
   initNavTurnero('admin-turnero');
-  if (!verificarAcceso()) return;
+  if (!(await verificarAcceso())) return;
 
   document.getElementById('form-agregar-box').addEventListener('submit', onAgregarBox);
   document.getElementById('form-agregar-horario').addEventListener('submit', onAgregarHorario);

@@ -76,7 +76,10 @@
 <script src="js/nav.js"></script>
 <script src="js/indicadores.js"></script>
 <script>
+const ROLES_INDICADORES = ['admin', 'supervisor'];
 document.addEventListener('DOMContentLoaded', () => {
+  const u = Sesion.obtener();
+  if (!u || !ROLES_INDICADORES.includes(rolEfectivo())) { window.location.href = 'index.html'; return; }
   NavPage.init('indicadores');
   initIndicadores();
   App.mostrar('indicadores');
