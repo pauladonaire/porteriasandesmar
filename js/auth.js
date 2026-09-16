@@ -39,8 +39,12 @@ const Auth = {
   },
 };
 
+// El atributo data-rol (que toda la gatekeeping CSS de estilos.css usa) refleja
+// el rol EFECTIVO — el real, salvo que un admin esté "viendo como" otro rol
+// (ver rolEfectivo() en js/api.js). El backend nunca ve esta simulación.
 function aplicarRol(rol) {
-  document.body.setAttribute('data-rol', rol || 'vigilador');
+  document.body.setAttribute('data-rol', rolEfectivo());
+  _initBarraRolSimulado(); // por si el login acaba de pasar sin recargar la página (index.html)
 }
 
 // ── Formulario de login ──────────────────────────────────────

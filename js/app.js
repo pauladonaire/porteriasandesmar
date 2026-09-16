@@ -111,6 +111,7 @@ const App = {
     if (Auth.verificar()) {
       apiWarmup();
       const u = Sesion.obtener();
+      aplicarRol(u.Rol);
       document.getElementById('topbar-user').textContent = u.Nombre_Apellido;
       const predio = u.Predio_Asignado === 'TODOS' ? 'Todos los predios' : u.Predio_Asignado;
       document.getElementById('topbar-predio').textContent = predio;
