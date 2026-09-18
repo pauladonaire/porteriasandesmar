@@ -24,6 +24,12 @@ function _trafViajesInvalidarCache() {
   try { sessionStorage.removeItem(TRAF_VIAJES_CACHE_KEY); } catch (e) { /* no crítico */ }
 }
 
+// Mismo motivo que _persAbiertosPromiseEnCurso en personal.js: si la precarga del
+// DOMContentLoaded todavía no volvió y ya tocaron "Ver viajes en ruta", enganchar ese
+// mismo pedido en vez de disparar uno nuevo en paralelo (compiten por el mismo lock
+// de la planilla en Apps Script y terminan tardando más los dos).
+let _trafViajesPromiseEnCurso = null;
+
 // ─────────────────────────────────────────────────────────────
 // HELPERS DE FOTO
 // ─────────────────────────────────────────────────────────────
@@ -300,8 +306,13 @@ const Trafico = {
       viajes = cache.viajes;
       this.cargarPendientes(); // en paralelo, sin bloquear el render de viajes
     } else {
+      if (!_trafViajesPromiseEnCurso) {
+        _trafViajesPromiseEnCurso = api('viajesEnRuta').finally(() => {
+          _trafViajesPromiseEnCurso = null;
+        });
+      }
       const [resViajes] = await Promise.all([
-        api('viajesEnRuta'),
+        _trafViajesPromiseEnCurso,
         this.cargarPendientes(),
       ]);
       if (!resViajes.ok) return;

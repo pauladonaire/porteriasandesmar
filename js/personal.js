@@ -27,6 +27,15 @@ function _persAbiertosInvalidarCache() {
   try { sessionStorage.removeItem(PERS_ABIERTOS_CACHE_KEY); } catch (e) { /* no crítico */ }
 }
 
+// Pedido en curso a personalAbiertos, si hay uno — para que si la precarga del
+// DOMContentLoaded todavía no volvió y el vigilador ya tocó "Ver personas adentro" (o el
+// atajo de Egreso), cargarLista() ENGANCHE ese mismo pedido en vez de disparar uno nuevo
+// en paralelo. Dos pedidos a la vez contra Apps Script compiten por el mismo lock de la
+// planilla y en la práctica hacen que los DOS tarden más — justo lo contrario de lo que
+// se busca. Con esto, lo peor que puede pasar es esperar el primer pedido (el arranque en
+// frío real de Apps Script, que no se puede evitar desde acá).
+let _persAbiertosPromiseEnCurso = null;
+
 const Personal = {
   _movs: [], // última lista completa recibida del server, para filtrar sin volver a pedirla
 
@@ -109,7 +118,14 @@ const Personal = {
     if (cache) {
       this._movs = cache.movimientos;
     } else {
-      const res = await api('personalAbiertos');
+      // Si ya hay un pedido en curso (típicamente la precarga del DOMContentLoaded),
+      // enganchamos ese mismo — no disparamos uno nuevo en paralelo.
+      if (!_persAbiertosPromiseEnCurso) {
+        _persAbiertosPromiseEnCurso = api('personalAbiertos').finally(() => {
+          _persAbiertosPromiseEnCurso = null;
+        });
+      }
+      const res = await _persAbiertosPromiseEnCurso;
       if (!res.ok) { App.toast('Error al cargar lista de personal', 'err'); return; }
       this._movs = res.movimientos || [];
       _persAbiertosGuardarCache(this._movs);
