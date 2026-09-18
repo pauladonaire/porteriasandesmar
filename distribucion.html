@@ -212,6 +212,7 @@
 <script>
 document.addEventListener('DOMContentLoaded', () => {
   NavPage.init('distribucion');
+  apiWarmup(); // si venía parado un rato en esta pantalla y el backend se "enfrió", lo despierta antes de que registre algo
   initAltaChofer();
   initDistribucion();
   initScanner();

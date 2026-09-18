@@ -153,6 +153,7 @@
 <script>
 document.addEventListener('DOMContentLoaded', () => {
   NavPage.init('personal');
+  apiWarmup(); // si venía parado un rato en esta pantalla y el backend se "enfrió", lo despierta antes de que registre algo
   initPersonal();
   App.mostrar('personal');
   Catalogos.cargar().catch(() => App.toast('No se pudieron cargar los catálogos', 'warn'));
