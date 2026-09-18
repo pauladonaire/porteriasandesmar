@@ -53,6 +53,50 @@ function _prefetchDistribucionAbiertos() {
   }).catch(() => {});
 }
 
+// Prefetch de "personas adentro" — misma idea, misma clave que js/personal.js
+// (PERS_ABIERTOS_CACHE_KEY).
+function _prefetchPersonalAbiertos() {
+  const CACHE_KEY = 'ip_pers_abiertos_cache';
+  try {
+    const raw = sessionStorage.getItem(CACHE_KEY);
+    if (raw) {
+      const cached = JSON.parse(raw);
+      if (cached && (Date.now() - cached.ts) < 20000) return; // ya está fresco, no hace falta
+    }
+  } catch (e) { /* seguimos e intentamos igual */ }
+
+  if (typeof api !== 'function') return;
+  api('personalAbiertos').then(res => {
+    if (!res || !res.ok) return;
+    try {
+      sessionStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), movimientos: res.movimientos || [] }));
+    } catch (e) { /* no crítico */ }
+  }).catch(() => {});
+}
+
+// Prefetch de "viajes en ruta" — misma idea, misma clave que js/trafico.js
+// (TRAF_VIAJES_CACHE_KEY). No toca pendientes SITRACK (traficosPendientes):
+// esa lista está atada a lógica de auto-apertura por URL/sessionStorage y conviene
+// dejarla pedirse fresca solo cuando trafico.html realmente carga.
+function _prefetchTraficoViajes() {
+  const CACHE_KEY = 'ip_traf_viajes_cache';
+  try {
+    const raw = sessionStorage.getItem(CACHE_KEY);
+    if (raw) {
+      const cached = JSON.parse(raw);
+      if (cached && (Date.now() - cached.ts) < 20000) return;
+    }
+  } catch (e) { /* seguimos e intentamos igual */ }
+
+  if (typeof api !== 'function') return;
+  api('viajesEnRuta').then(res => {
+    if (!res || !res.ok) return;
+    try {
+      sessionStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), viajes: res.viajes || [] }));
+    } catch (e) { /* no crítico */ }
+  }).catch(() => {});
+}
+
 // Roles enfocados en el Turnero: no operan ingreso/egreso de Portería, solo ven
 // Unidades QR (para imprimir). Si entran a estas páginas por URL directa, se los
 // manda de vuelta al home (el backend igual les rechaza cualquier acción vía
@@ -118,6 +162,8 @@ const NavPage = {
         // Es "mejor esfuerzo": si la navegación gana la carrera, no pasa nada — la
         // página de destino igual hace su propio pedido (ver js/distribucion.js).
         if (destino === 'distribucion') _prefetchDistribucionAbiertos();
+        if (destino === 'personal')     _prefetchPersonalAbiertos();
+        if (destino === 'trafico')      _prefetchTraficoViajes();
         window.location.href = destino === 'home' ? 'index.html' : destino + '.html';
       });
     });

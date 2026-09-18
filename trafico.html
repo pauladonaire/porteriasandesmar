@@ -400,6 +400,11 @@ document.addEventListener('DOMContentLoaded', () => {
   Catalogos.cargar().catch(() => App.toast('No se pudieron cargar los catálogos', 'warn'));
   const hasPend = sessionStorage.getItem('pendSitrack') || new URLSearchParams(window.location.search).get('sitrack');
   App.mostrar(hasPend ? 'dentro-traf' : 'trafico');
+
+  // Si no vino por un pendiente SITRACK (que ya dispara cargarViajes() vía App.mostrar
+  // arriba), precargamos "Viajes en Ruta" en paralelo para que esté en caché apenas
+  // toquen "Ver viajes en ruta →".
+  if (!hasPend) Trafico.cargarViajes();
 });
 </script>
 </body>

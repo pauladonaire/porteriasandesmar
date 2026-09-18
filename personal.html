@@ -157,6 +157,11 @@ document.addEventListener('DOMContentLoaded', () => {
   initPersonal();
   App.mostrar('personal');
   Catalogos.cargar().catch(() => App.toast('No se pudieron cargar los catálogos', 'warn'));
+
+  // Precarga en paralelo de "Personas Adentro" — para que al tocar "Ver personas
+  // adentro" o el atajo de Egreso, la lista ya esté en caché y se pinte al instante
+  // en vez de esperar el viaje a Apps Script recién en ese momento.
+  Personal.cargarLista();
 });
 </script>
 </body>

@@ -1,5 +1,32 @@
 // personal.js — Formularios y lista de personal (visitas/clientes/proveedores)
 
+// Caché de "personas adentro" — mismo patrón que distribucion.js (DIST_ABIERTOS_*).
+// Antes cada entrada a "Ver personas adentro" o al atajo de Egreso esperaba el
+// viaje completo a Apps Script (2-4s) aunque sean solo ~20 personas — el cuello de
+// botella era la latencia del backend, no el tamaño de la lista.
+const PERS_ABIERTOS_CACHE_KEY = 'ip_pers_abiertos_cache';
+const PERS_ABIERTOS_CACHE_TTL_MS = 30000;
+
+function _persAbiertosLeerCache() {
+  try {
+    const raw = sessionStorage.getItem(PERS_ABIERTOS_CACHE_KEY);
+    if (!raw) return null;
+    const cached = JSON.parse(raw);
+    if (!cached || (Date.now() - cached.ts) >= PERS_ABIERTOS_CACHE_TTL_MS) return null;
+    return cached;
+  } catch (e) {
+    return null;
+  }
+}
+function _persAbiertosGuardarCache(movimientos) {
+  try {
+    sessionStorage.setItem(PERS_ABIERTOS_CACHE_KEY, JSON.stringify({ ts: Date.now(), movimientos }));
+  } catch (e) { /* no crítico */ }
+}
+function _persAbiertosInvalidarCache() {
+  try { sessionStorage.removeItem(PERS_ABIERTOS_CACHE_KEY); } catch (e) { /* no crítico */ }
+}
+
 const Personal = {
   _movs: [], // última lista completa recibida del server, para filtrar sin volver a pedirla
 
@@ -38,6 +65,7 @@ const Personal = {
       toggleMatricula();
       const sp = document.getElementById('sel-predio-pers');
       if (sp && sp._comboInput) sp._comboInput.value = '';
+      _persAbiertosInvalidarCache(); // el ingreso recién creado tiene que verse ya, no en 30s
       App.mostrar('dentro-pers');
     } else {
       App.toast(res.error, 'err');
@@ -46,12 +74,24 @@ const Personal = {
 
   // ── Registrar egreso ──────────────────────────────────────────
   async registrarEgreso(idMov, observaciones) {
+    // Optimista: ocultar la tarjeta ya mismo, sin esperar la respuesta del servidor
+    // (los ~2-4s de ida y vuelta con Apps Script dejan de sentirse) — mismo patrón
+    // que distribucion.js.
+    const card = document.querySelector('.mov-card[data-id-mov="' + idMov + '"]');
+    if (card) card.style.display = 'none';
+
     const res = await api('personalEgreso', { idMov, observaciones });
     if (res.ok) {
       App.toast('Egreso registrado — ' + res.horasDentro + 'h dentro', 'ok');
-      this.cargarLista();
+      // Sacamos la persona de la lista en memoria y de la caché sin volver a pedirle
+      // todo al server: ya sabemos que salió, no hace falta esperar otro viaje a GAS.
+      this._movs = this._movs.filter(m => m.ID_Mov !== idMov);
+      _persAbiertosGuardarCache(this._movs);
+      const badge = document.getElementById('badge-pers');
+      if (badge) badge.textContent = this._movs.length + ' adentro';
     } else {
       App.toast(res.error, 'err');
+      if (card) card.style.display = ''; // no se pudo cerrar — la persona sigue adentro
     }
     return res;
   },
@@ -65,9 +105,15 @@ const Personal = {
 
   // ── Cargar lista de abiertos ───────────────────────────────────
   async cargarLista() {
-    const res = await api('personalAbiertos');
-    if (!res.ok) { App.toast('Error al cargar lista de personal', 'err'); return; }
-    this._movs = res.movimientos || [];
+    const cache = _persAbiertosLeerCache();
+    if (cache) {
+      this._movs = cache.movimientos;
+    } else {
+      const res = await api('personalAbiertos');
+      if (!res.ok) { App.toast('Error al cargar lista de personal', 'err'); return; }
+      this._movs = res.movimientos || [];
+      _persAbiertosGuardarCache(this._movs);
+    }
     const buscar = document.getElementById('buscar-pers');
     if (buscar) this.filtrar(buscar.value);
     else this.renderizarLista(this._movs);
@@ -104,7 +150,7 @@ const Personal = {
       const tipoBadge = { visita: '👤 Visita', cliente: '🛒 Cliente', proveedor: '🔧 Proveedor' };
       const nombreEsc = m.Nombre_Apellido.replace(/'/g, "\\'");
       return `
-        <div class="mov-card pers-border">
+        <div class="mov-card pers-border" data-id-mov="${m.ID_Mov}">
           <div class="mov-card-header">
             <span class="mov-card-id">${m.Nombre_Apellido}</span>
             <span class="tag tag-abierto">↑ ${horas}</span>

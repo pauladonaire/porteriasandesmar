@@ -1,5 +1,29 @@
 // trafico.js — Formulario y lista de tráfico (planilla interbase)
 
+// Caché de "viajes en ruta" — mismo patrón que DIST_ABIERTOS_* de distribucion.js.
+const TRAF_VIAJES_CACHE_KEY = 'ip_traf_viajes_cache';
+const TRAF_VIAJES_CACHE_TTL_MS = 30000;
+
+function _trafViajesLeerCache() {
+  try {
+    const raw = sessionStorage.getItem(TRAF_VIAJES_CACHE_KEY);
+    if (!raw) return null;
+    const cached = JSON.parse(raw);
+    if (!cached || (Date.now() - cached.ts) >= TRAF_VIAJES_CACHE_TTL_MS) return null;
+    return cached;
+  } catch (e) {
+    return null;
+  }
+}
+function _trafViajesGuardarCache(viajes) {
+  try {
+    sessionStorage.setItem(TRAF_VIAJES_CACHE_KEY, JSON.stringify({ ts: Date.now(), viajes }));
+  } catch (e) { /* no crítico */ }
+}
+function _trafViajesInvalidarCache() {
+  try { sessionStorage.removeItem(TRAF_VIAJES_CACHE_KEY); } catch (e) { /* no crítico */ }
+}
+
 // ─────────────────────────────────────────────────────────────
 // HELPERS DE FOTO
 // ─────────────────────────────────────────────────────────────
@@ -260,6 +284,7 @@ const Trafico = {
         App.toast('Drive sin autorización — las fotos no se guardaron. Ver instrucciones de deploy.', 'warn');
       }
 
+      _trafViajesInvalidarCache();
       this.cargarViajes();
     } else {
       App.toast(res.error, 'err');
@@ -269,14 +294,23 @@ const Trafico = {
   // ── Viajes en ruta ──────────────────────────────────────
 
   async cargarViajes() {
-    const [resViajes] = await Promise.all([
-      api('viajesEnRuta'),
-      this.cargarPendientes(),
-    ]);
-    if (!resViajes.ok) return;
-    this.renderizarViajes(resViajes.viajes || []);
+    const cache = _trafViajesLeerCache();
+    let viajes;
+    if (cache) {
+      viajes = cache.viajes;
+      this.cargarPendientes(); // en paralelo, sin bloquear el render de viajes
+    } else {
+      const [resViajes] = await Promise.all([
+        api('viajesEnRuta'),
+        this.cargarPendientes(),
+      ]);
+      if (!resViajes.ok) return;
+      viajes = resViajes.viajes || [];
+      _trafViajesGuardarCache(viajes);
+    }
+    this.renderizarViajes(viajes);
     const badge = document.getElementById('badge-traf');
-    if (badge) badge.textContent = (resViajes.viajes || []).length + ' en ruta';
+    if (badge) badge.textContent = viajes.length + ' en ruta';
   },
 
   renderizarViajes(viajes) {
