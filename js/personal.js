@@ -5,7 +5,7 @@ const Personal = {
 
   // ── Registrar ingreso ─────────────────────────────────────────
   async registrarIngreso(form) {
-    const idPredio     = form.querySelector('#sel-predio-pers').value;
+    const idPredio     = predioFijoVigilador() || form.querySelector('#sel-predio-pers').value;
     const tipoRegistro = form.querySelector('#sel-tipo-pers').value;
     const nombre       = form.querySelector('#pers-nombre').value.trim();
     const dni          = form.querySelector('#pers-dni').value.trim();
@@ -144,6 +144,19 @@ function initPersonal() {
   document.getElementById('form-pers-ingreso').addEventListener('submit', async e => {
     e.preventDefault();
     await Personal.registrarIngreso(e.target);
+  });
+
+  // "Tipo de Evento: Egreso" es un atajo de navegación (no un estado del formulario de
+  // ingreso): lleva directo a "Personas Adentro" — ya tiene buscador por nombre/DNI y
+  // egreso de un toque — en vez de obligar a bajar hasta "Ver personas adentro →". Se
+  // vuelve a marcar "Ingreso" enseguida para que la próxima vez que entre al formulario
+  // no quede pisado.
+  document.querySelectorAll('input[name="tipo-evento-pers"]').forEach(r => {
+    r.addEventListener('change', () => {
+      if (r.value !== 'egreso' || !r.checked) return;
+      App.mostrar('dentro-pers');
+      document.getElementById('pers-ev-ing').checked = true;
+    });
   });
 
   // Mostrar/ocultar campo matrícula

@@ -106,7 +106,7 @@ const Trafico = {
   async registrarEvento(form) {
     // ── Campos existentes ────────────────────────────────
     const tipoEvento   = form.querySelector('input[name="tipo-evento-traf"]:checked')?.value;
-    const idPredio     = form.querySelector('#sel-predio-traf').value;
+    const idPredio     = predioFijoVigilador() || form.querySelector('#sel-predio-traf').value;
     const idServicio   = form.querySelector('#sel-servicio-traf').value;
     const servicioOtro = form.querySelector('#traf-serv-otro').value.trim();
     const tractor      = form.querySelector('#traf-tractor').value.trim().toUpperCase();

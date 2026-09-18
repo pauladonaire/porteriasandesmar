@@ -34,6 +34,15 @@
 
     <form id="form-dist-ingreso">
       <div class="field">
+        <label>Tipo de Evento *</label>
+        <div class="segmented">
+          <input type="radio" name="tipo-evento-dist" id="dist-ev-ing" value="ingreso" checked>
+          <label for="dist-ev-ing">↑ Ingreso</label>
+          <input type="radio" name="tipo-evento-dist" id="dist-ev-egr" value="egreso">
+          <label for="dist-ev-egr">↓ Egreso</label>
+        </div>
+      </div>
+      <div class="field">
         <label>Predio</label>
         <select id="sel-predio-dist" required></select>
       </div>
@@ -46,26 +55,31 @@
         <button type="button" id="btn-scan-linterna" class="btn btn-outline btn-sm" style="width:auto" hidden>🔦 Linterna</button>
       </div>
       <div id="qr-reader" style="display:none;max-width:100%"></div>
-      <div class="field">
-        <label>Chofer</label>
-        <div style="display:flex;gap:8px">
-          <select id="sel-chofer-dist" style="flex:1"></select>
-          <button type="button" class="btn btn-outline btn-sm btn-nuevo-chofer" style="white-space:nowrap;width:auto">+ Chofer</button>
+
+      <!-- Solo INGRESO: en egreso rápido no hace falta chofer ni nocturno -->
+      <div id="grupo-dist-ingreso">
+        <div class="field">
+          <label>Chofer</label>
+          <div style="display:flex;gap:8px">
+            <select id="sel-chofer-dist" style="flex:1"></select>
+            <button type="button" class="btn btn-outline btn-sm btn-nuevo-chofer" style="white-space:nowrap;width:auto">+ Chofer</button>
+          </div>
+        </div>
+        <div class="field">
+          <div class="chip-group">
+            <input type="checkbox" id="chk-nocturno-dist">
+            <label for="chk-nocturno-dist">🌙 Estacionamiento Nocturno</label>
+          </div>
         </div>
       </div>
+
       <div class="field">
-        <label>Estado de Carga al Ingreso</label>
+        <label id="lbl-estado-carga-dist">Estado de Carga al Ingreso</label>
         <div class="segmented">
           <input type="radio" name="estado-carga-dist" id="carga-con" value="con_carga">
           <label for="carga-con">Con Carga</label>
           <input type="radio" name="estado-carga-dist" id="carga-sin" value="sin_carga">
           <label for="carga-sin">Sin Carga</label>
-        </div>
-      </div>
-      <div class="field">
-        <div class="chip-group">
-          <input type="checkbox" id="chk-nocturno-dist">
-          <label for="chk-nocturno-dist">🌙 Estacionamiento Nocturno</label>
         </div>
       </div>
       <div class="field">
@@ -76,7 +90,7 @@
         <label>Observaciones</label>
         <textarea id="obs-dist" placeholder="Novedades, daños, etc."></textarea>
       </div>
-      <button type="submit" class="btn btn-ingreso">↑ Registrar Ingreso</button>
+      <button type="submit" id="btn-submit-dist" class="btn btn-ingreso">↑ Registrar Ingreso</button>
     </form>
 
     <hr class="divider">

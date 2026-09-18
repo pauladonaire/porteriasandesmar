@@ -73,7 +73,7 @@ const Distribucion = {
 
   // ── Registrar ingreso ─────────────────────────────────────────
   async registrarIngreso(form) {
-    const idPredio     = form.querySelector('#sel-predio-dist').value;
+    const idPredio     = predioFijoVigilador() || form.querySelector('#sel-predio-dist').value;
     const idUnidad     = form.querySelector('#sel-unidad-dist').value;
     const chofer       = form.querySelector('#sel-chofer-dist').value;
     const estadoCarga  = form.querySelector('input[name="estado-carga-dist"]:checked')?.value;
@@ -108,6 +108,69 @@ const Distribucion = {
       App.mostrar('dentro-dist');
     } else {
       App.toast(res.error, 'err');
+    }
+  },
+
+  // ── Registrar egreso RÁPIDO (toggle "Tipo de Evento: Egreso") ──────────────────
+  // A diferencia de registrarEgreso (que necesita el idMov de una tarjeta ya listada
+  // en "Unidades Adentro"), acá se identifica la unidad por QR o por el combobox — el
+  // backend (distribucionEgresoPorUnidad, apps-script/Distribucion.gs) busca el
+  // ingreso abierto de esa unidad en el predio y lo cierra directo. Pensado para que
+  // el vigilador no tenga que entrar a la lista y buscar la tarjeta correspondiente.
+  async registrarEgresoRapido(form) {
+    const idPredio     = predioFijoVigilador() || form.querySelector('#sel-predio-dist').value;
+    const idUnidad     = form.querySelector('#sel-unidad-dist').value;
+    const estadoCarga  = form.querySelector('input[name="estado-carga-dist"]:checked')?.value;
+    const detalleCarga = form.querySelector('#det-carga-dist').value;
+    const observaciones= form.querySelector('#obs-dist').value;
+
+    if (!idPredio)    { App.toast('Seleccioná el predio', 'err'); return; }
+    if (!idUnidad)    { App.toast('Escaneá o seleccioná la unidad', 'err'); return; }
+    if (!estadoCarga) { App.toast('Indicá el estado de carga', 'err'); return; }
+
+    const btn = form.querySelector('[type="submit"]');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span> Registrando...';
+
+    const res = await api('distribucionEgresoPorUnidad', { idPredio, idUnidad, estadoCarga, detalleCarga, observaciones });
+    btn.disabled = false;
+
+    if (res.ok) {
+      if (res.sinIngreso) {
+        // Quedó registrado igual, pero como anomalía (sin ingreso previo) — avisar bien
+        // claro para que el vigilador sepa que no es un egreso "normal".
+        App.toast('⚠ Egreso registrado SIN ingreso previo — ' + res.dominio + ' (queda marcado para seguimiento)', 'warn', 6000);
+      } else {
+        App.toast('Egreso registrado — ' + res.dominio + ' · ' + res.horasDentro + 'h dentro', 'ok');
+      }
+      form.reset(); // vuelve a dejar tildado "Ingreso" (checked por defecto en el HTML)
+      const su = document.getElementById('sel-unidad-dist');
+      if (su && su._comboInput) su._comboInput.value = '';
+      this.aplicarPredioFijo();
+      this.actualizarModoFormulario(form); // recién ACÁ: ya con el radio de vuelta en "Ingreso"
+      _distAbiertosInvalidarCache();
+    } else {
+      this.actualizarModoFormulario(form); // el radio sigue en "Egreso" — solo repone el texto/spinner del botón
+      App.toast(res.error, 'err');
+    }
+  },
+
+  // ── Mostrar/ocultar campos de ingreso según el toggle "Tipo de Evento" ─────────
+  actualizarModoFormulario(form) {
+    const tipoEvento = form.querySelector('input[name="tipo-evento-dist"]:checked')?.value || 'ingreso';
+    const esEgreso = tipoEvento === 'egreso';
+
+    const grupoIngreso = document.getElementById('grupo-dist-ingreso');
+    if (grupoIngreso) grupoIngreso.style.display = esEgreso ? 'none' : '';
+
+    const lblEstadoCarga = document.getElementById('lbl-estado-carga-dist');
+    if (lblEstadoCarga) lblEstadoCarga.textContent = esEgreso ? 'Estado de Carga al Egreso' : 'Estado de Carga al Ingreso';
+
+    const btn = document.getElementById('btn-submit-dist');
+    if (btn) {
+      btn.classList.toggle('btn-ingreso', !esEgreso);
+      btn.classList.toggle('btn-egreso', esEgreso);
+      btn.textContent = esEgreso ? '↓ Registrar Egreso' : '↑ Registrar Ingreso';
     }
   },
 
@@ -222,10 +285,16 @@ function abrirEgresoDistModal(idMov, dominio) {
 }
 
 function initDistribucion() {
-  // Formulario de ingreso
+  // Formulario de ingreso/egreso — el toggle "Tipo de Evento" decide qué registrar
   document.getElementById('form-dist-ingreso').addEventListener('submit', async e => {
     e.preventDefault();
-    await Distribucion.registrarIngreso(e.target);
+    const tipoEvento = e.target.querySelector('input[name="tipo-evento-dist"]:checked')?.value || 'ingreso';
+    if (tipoEvento === 'egreso') await Distribucion.registrarEgresoRapido(e.target);
+    else await Distribucion.registrarIngreso(e.target);
+  });
+
+  document.querySelectorAll('input[name="tipo-evento-dist"]').forEach(r => {
+    r.addEventListener('change', () => Distribucion.actualizarModoFormulario(document.getElementById('form-dist-ingreso')));
   });
 
   // Modal egreso

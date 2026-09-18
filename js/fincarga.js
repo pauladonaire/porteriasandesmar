@@ -63,10 +63,17 @@ async function onSubmitFinCarga(e) {
 
 document.addEventListener('DOMContentLoaded', () => {
   initTemaToggle();
-  initSelectorDeposito(() => { cargarOperarios(); cargarPendientes(); });
+  apiTurneroWarmup(); // "despierta" el GAS del Turnero apenas abre la página, antes de que el operario termine de elegir su nombre/patente
 
   document.getElementById('form-fincarga').addEventListener('submit', onSubmitFinCarga);
+  // Antes esto se llamaba acá Y de nuevo dentro del callback del selector de depósito
+  // (más abajo) — el doble de pedidos al servidor en cada carga de página, sin
+  // necesidad: TurneroDeposito.obtener() ya devuelve el depósito correcto de forma
+  // sincrónica (localStorage o el usuario), no depende de que el selector termine de
+  // pintarse. Se dejan solo estas dos llamadas.
   cargarOperarios();
   cargarPendientes();
   setInterval(cargarPendientes, 60000);
+
+  initSelectorDeposito(() => { cargarOperarios(); cargarPendientes(); }); // solo re-carga si el operario CAMBIA de depósito a mano
 });

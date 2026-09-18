@@ -60,6 +60,34 @@ function _prefetchDistribucionAbiertos() {
 const ROLES_SIN_PORTERIA = ['admin_deposito', 'operaciones', 'distribucion'];
 const PAGINAS_PORTERIA_RESTRINGIDA = ['distribucion', 'trafico', 'personal'];
 
+// Si el usuario logueado es 'vigilador' con un único predio fijo asignado
+// (Predio_Asignado != 'TODOS' y no vacío), devuelve ese ID de predio — para usarlo
+// directo en Distribución/Tráfico/Personal sin hacerlo elegir ni esperar a que carguen
+// los catálogos. Solo vigilador puede estar así de restringido: supervisor/admin
+// siempre operan con Predio_Asignado = 'TODOS' (ver puedeOperarPredio_ en Auth.gs), así
+// que para ellos esto no aplica y el selector de predio sigue como está hoy.
+function predioFijoVigilador() {
+  const u = Sesion.obtener();
+  if (!u || u.Rol !== 'vigilador') return null;
+  const p = String(u.Predio_Asignado || '').trim();
+  if (!p || p.toUpperCase() === 'TODOS') return null;
+  return p;
+}
+
+// Oculta el campo "Predio" (label + select) de la página actual si el vigilador tiene
+// predio fijo — se llama ANTES de cargar catálogos (ver NavPage.init), así no hay que
+// esperar ningún pedido al servidor para poder operar. Los formularios de
+// Distribución/Tráfico/Personal siguen leyendo predioFijoVigilador() directamente al
+// enviar (no dependen de que este select tenga valor).
+function ocultarCampoPredioSiFijo() {
+  if (!predioFijoVigilador()) return;
+  ['sel-predio-dist', 'sel-predio-traf', 'sel-predio-pers'].forEach(id => {
+    const sel = document.getElementById(id);
+    const campo = sel && sel.closest('.field');
+    if (campo) campo.style.display = 'none';
+  });
+}
+
 // NavPage: guard de sesión, topbar, bottom-nav, logout
 const NavPage = {
   init(paginaActual) {
@@ -71,6 +99,7 @@ const NavPage = {
       return;
     }
 
+    ocultarCampoPredioSiFijo();
     aplicarRol(u.Rol);
     document.getElementById('topbar-user').textContent = u.Nombre_Apellido;
     const predio = u.Predio_Asignado === 'TODOS' ? 'Todos los predios' : u.Predio_Asignado;

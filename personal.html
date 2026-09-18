@@ -34,6 +34,15 @@
 
     <form id="form-pers-ingreso">
       <div class="field">
+        <label>Tipo de Evento *</label>
+        <div class="segmented">
+          <input type="radio" name="tipo-evento-pers" id="pers-ev-ing" value="ingreso" checked>
+          <label for="pers-ev-ing">↑ Ingreso</label>
+          <input type="radio" name="tipo-evento-pers" id="pers-ev-egr" value="egreso">
+          <label for="pers-ev-egr">↓ Egreso</label>
+        </div>
+      </div>
+      <div class="field">
         <label>Predio</label>
         <select id="sel-predio-pers" required></select>
       </div>
