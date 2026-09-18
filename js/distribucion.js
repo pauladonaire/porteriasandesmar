@@ -25,6 +25,14 @@ function _distAbiertosInvalidarCache() {
   try { sessionStorage.removeItem(DIST_ABIERTOS_CACHE_KEY); } catch (e) { /* no crítico */ }
 }
 
+// Pedido en curso a distribucionAbiertos, si hay uno — para que el prefetch que dispara
+// nav.js al tocar "Distribuc." (_prefetchDistribucionAbiertos) y la carga propia de esta
+// página (cargarLista, más abajo) no terminen pidiendo lo mismo dos veces en paralelo si
+// la navegación fue más rápida que la respuesta del prefetch. Dos pedidos a la vez contra
+// Apps Script compiten por el mismo lock de la planilla y en la práctica hacen que los DOS
+// tarden más — mismo motivo que _persAbiertosPromiseEnCurso en personal.js.
+let _distAbiertosPromiseEnCurso = null;
+
 const Distribucion = {
   // ── Predio fijo cuando el vigilador solo tiene uno asignado ───
   // Si el select de predio quedó con una sola opción disponible (el back ya filtra por
@@ -208,8 +216,13 @@ const Distribucion = {
       movs = cache.movimientos;
       actualizadoTs = cache.ts;
     } else {
+      if (!_distAbiertosPromiseEnCurso) {
+        _distAbiertosPromiseEnCurso = api('distribucionAbiertos').finally(() => {
+          _distAbiertosPromiseEnCurso = null;
+        });
+      }
       const [res] = await Promise.all([
-        api('distribucionAbiertos'),
+        _distAbiertosPromiseEnCurso,
         catalogosListos || Promise.resolve(),
       ]);
       if (!res.ok) { App.toast('Error al cargar lista', 'err'); return; }

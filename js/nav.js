@@ -122,12 +122,20 @@ function predioFijoVigilador() {
 // predio fijo — se llama ANTES de cargar catálogos (ver NavPage.init), así no hay que
 // esperar ningún pedido al servidor para poder operar. Los formularios de
 // Distribución/Tráfico/Personal siguen leyendo predioFijoVigilador() directamente al
-// enviar (no dependen de que este select tenga valor).
+// enviar (no dependen de que este select tenga valor)... PERO el <select> tiene el
+// atributo HTML `required`, y un <select> requerido sin valor bloquea el envío del
+// formulario a nivel del navegador ANTES de que corra nuestro JS — ni siquiera llega a
+// dispararse el evento 'submit' (por eso el botón "no anda": no es un error, el browser
+// nunca deja enviar el form). Como el campo queda oculto, en algunos navegadores ni
+// siquiera se ve el aviso de "completá este campo". Por eso acá también le sacamos el
+// `required`: el predio real se sigue mandando igual, por predioFijoVigilador().
 function ocultarCampoPredioSiFijo() {
   if (!predioFijoVigilador()) return;
   ['sel-predio-dist', 'sel-predio-traf', 'sel-predio-pers'].forEach(id => {
     const sel = document.getElementById(id);
-    const campo = sel && sel.closest('.field');
+    if (!sel) return;
+    sel.required = false;
+    const campo = sel.closest('.field');
     if (campo) campo.style.display = 'none';
   });
 }
