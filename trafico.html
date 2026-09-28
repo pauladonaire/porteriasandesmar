@@ -63,7 +63,11 @@
       <!-- ── Servicio ────────────────────────────────────── -->
       <div class="field">
         <label>Servicio</label>
-        <select id="sel-servicio-traf"></select>
+        <div style="display:flex;gap:8px">
+          <select id="sel-servicio-traf" style="flex:1"></select>
+          <button type="button" class="btn btn-outline btn-sm" id="btn-nuevo-servicio"
+                  style="white-space:nowrap;width:auto">+ Servicio</button>
+        </div>
       </div>
       <div class="field" id="row-serv-otro" style="display:none">
         <label>Especificar servicio</label>
@@ -344,6 +348,27 @@
   </div>
 </div>
 
+<div id="modal-alta-servicio" class="modal-backdrop" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:150;align-items:center;justify-content:center;padding:16px">
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;width:100%;max-width:400px">
+    <h3 style="font-family:'Barlow Condensed',sans-serif;font-size:1.4rem;color:var(--brand);margin-bottom:16px">Nuevo Servicio</h3>
+    <div style="background:rgba(245,165,36,.12);border:1px solid var(--warn,#f5a524);border-radius:8px;padding:10px 12px;margin-bottom:16px;font-size:.82rem;line-height:1.4">
+      ⚠ Este servicio va a quedar disponible para <strong>todos los próximos ingresos/egresos</strong> de Tráfico, en cualquier predio. Usalo solo si el servicio realmente no está en la lista.
+    </div>
+    <form id="form-alta-servicio">
+      <div class="field"><label>Nombre del servicio *</label>
+        <input id="ns-descripcion" type="text" required placeholder="Ej: CAMION MZA - SAN RAFAEL">
+      </div>
+      <div class="field"><label>Código (opcional)</label>
+        <input id="ns-codigo" type="text" placeholder="Ej: 205">
+      </div>
+      <div class="btn-row">
+        <button type="button" id="btn-cancelar-servicio" class="btn btn-outline">Cancelar</button>
+        <button type="submit" class="btn btn-primary">Dar de Alta</button>
+      </div>
+    </form>
+  </div>
+</div>
+
 <!-- ── MODAL GESTIÓN SITRACK ──────────────────────── -->
 <div id="modal-sitrack" class="modal-backdrop" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:200;align-items:flex-start;justify-content:center;padding:16px;overflow-y:auto">
   <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;width:100%;max-width:480px;margin-top:8px">
@@ -396,6 +421,7 @@ document.addEventListener('DOMContentLoaded', () => {
   apiWarmup(); // si venía parado un rato en esta pantalla y el backend se "enfrió", lo despierta antes de que registre algo
   initAltaUnidad();
   initAltaChofer();
+  initAltaServicio();
   initTrafico();
   Catalogos.cargar().catch(() => App.toast('No se pudieron cargar los catálogos', 'warn'));
   const hasPend = sessionStorage.getItem('pendSitrack') || new URLSearchParams(window.location.search).get('sitrack');
