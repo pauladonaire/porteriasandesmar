@@ -75,5 +75,14 @@ document.addEventListener('DOMContentLoaded', () => {
   cargarPendientes();
   setInterval(cargarPendientes, 60000);
 
+  // Al bloquear la pantalla del celular, el navegador pausa el setInterval de arriba
+  // (segundo plano) — al desbloquear, la lista queda congelada hasta el próximo tick
+  // (hasta 60s después), y el operario ve la lista vieja/vacía y termina cargando la
+  // patente a mano. Con esto, apenas vuelve a estar visible la pantalla, se refresca
+  // al toque en vez de esperar el intervalo.
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') cargarPendientes();
+  });
+
   initSelectorDeposito(() => { cargarOperarios(); cargarPendientes(); }); // solo re-carga si el operario CAMBIA de depósito a mano
 });
