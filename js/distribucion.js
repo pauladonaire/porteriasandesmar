@@ -192,7 +192,12 @@ const Distribucion = {
       .find(c => c.dataset.idMov === idMov);
     if (card) card.style.display = 'none';
 
-    const res = await api('distribucionEgreso', { idMov, estadoCarga, detalleCarga, observaciones });
+    // idPredio: predio físico donde está parado el vigilador — puede ser distinto del
+    // predio de ingreso del movimiento si la unidad entró por otro predio del mismo
+    // depósito ("egreso cruzado"). Si no tiene predio fijo (supervisor/admin viendo todo
+    // el depósito), el backend lo deja en blanco y usa el predio de ingreso por defecto.
+    const idPredio = predioFijoVigilador() || '';
+    const res = await api('distribucionEgreso', { idMov, idPredio, estadoCarga, detalleCarga, observaciones });
     if (res.ok) {
       App.toast('Egreso registrado — ' + res.horasDentro + 'h dentro', 'ok');
       _distAbiertosInvalidarCache();
