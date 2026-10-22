@@ -1,113 +1,67 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta name="theme-color" content="#1e40af">
-  <title>Administración — Turnero</title>
-  <link rel="icon" href="data:,">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/turnero.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta http-equiv="refresh" content="3;url=https://porteria.andesmarcargas.com/web/admin-turnero.html">
+<title>Porterías — Nueva dirección</title>
+<link rel="icon" href="data:,">
+<style>
+  :root { color-scheme: light; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; min-height: 100vh; display: flex; align-items: center; justify-content: center;
+    background: #0b1f3a; color: #eef3fb;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    padding: 24px;
+  }
+  .card {
+    max-width: 420px; width: 100%; text-align: center;
+    background: #122a4d; border: 1px solid #1f3f6e; border-radius: 16px;
+    padding: 36px 28px; box-shadow: 0 10px 30px rgba(0,0,0,.35);
+  }
+  .logo { font-weight: 700; font-size: 1.3rem; letter-spacing: .5px; color: #fff; margin-bottom: 4px; }
+  .sub { font-size: .85rem; color: #9fb3d1; margin-bottom: 22px; }
+  h1 { font-size: 1.15rem; margin: 0 0 10px; color: #fff; }
+  p { font-size: .92rem; line-height: 1.5; color: #cdd9ec; margin: 0 0 18px; }
+  .btn {
+    display: inline-block; width: 100%; padding: 13px 16px; border-radius: 10px;
+    background: #2dd4a7; color: #06281f; font-weight: 700; text-decoration: none;
+    font-size: .95rem; margin-bottom: 20px;
+  }
+  .contacto {
+    border-top: 1px solid #1f3f6e; padding-top: 16px; font-size: .82rem; color: #9fb3d1;
+  }
+  .contacto a { color: #7fd1ff; text-decoration: none; }
+  .spinner {
+    width: 22px; height: 22px; margin: 0 auto 18px; border-radius: 50%;
+    border: 3px solid #2dd4a733; border-top-color: #2dd4a7; animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
 </head>
 <body>
 
-<div class="t-page">
+<div class="card">
+  <div class="logo">Porterías</div>
+  <div class="sub">Sistema de Ingresos y Egresos</div>
 
-  <header class="t-header">
-    <div>
-      <div class="t-header-title">Administración</div>
-      <div class="t-header-sub">Boxes · Horarios · Operarios</div>
-    </div>
-    <div class="t-header-right">
-      <div class="t-deposito-selector" id="t-deposito-selector">
-        <button type="button" class="t-dep-btn" data-dep="MZA">MZA</button>
-        <button type="button" class="t-dep-btn" data-dep="BUE">BUE</button>
-      </div>
-      <button type="button" class="t-tema-btn" id="btn-toggle-tema" title="Cambiar tema">🌙</button>
-      <a href="index.html" class="t-tema-btn" style="text-decoration:none">← Portería</a>
-    </div>
-  </header>
+  <div class="spinner"></div>
+  <h1>Este link ya no se usa más</h1>
+  <p><strong>pauladonaire.github.io/porteriasandesmar</strong> fue dado de baja.<br>Usá el nuevo link — te estamos redirigiendo automáticamente. Si no pasa nada en unos segundos, tocá el botón:</p>
 
-  <nav class="t-nav">
-    <button class="t-nav-btn" data-pagina="playa">Playa en Vivo</button>
-    <button class="t-nav-btn" data-pagina="turnos">Turnos</button>
-    <button class="t-nav-btn" data-pagina="indicadores-playa">Indicadores</button>
-    <button class="t-nav-btn" data-pagina="tiempodecarga">Tiempo de Carga</button>
-    <button class="t-nav-btn activo" data-pagina="admin-turnero">Administración</button>
-    <button class="t-nav-btn" data-pagina="fincarga">Fin de Carga</button>
-  </nav>
+  <a class="btn" id="btn-ir" href="https://porteria.andesmarcargas.com/web/admin-turnero.html">Ir al nuevo sitio</a>
 
-  <div class="t-error-msg t-hidden" id="t-acceso-denegado" style="margin:16px">
-    No tenés permiso para administrar este depósito.
+  <div class="contacto">
+    Ante cualquier duda, comunicate con <strong>Paula Donaire</strong><br>
+    <a href="tel:+542615965788">2615965788</a>
   </div>
-
-  <div id="t-admin-contenido">
-
-    <div class="t-cols-2">
-
-      <!-- Boxes -->
-      <div class="t-form-card">
-        <div class="t-form-title">🅿️ Boxes de carga</div>
-        <div id="lista-boxes"></div>
-        <div class="t-empty t-hidden" id="empty-boxes">No hay boxes cargados.</div>
-        <form id="form-agregar-box" class="t-mt" style="display:flex;gap:8px;align-items:flex-end">
-          <div class="t-field" style="margin-bottom:0;flex:1">
-            <label class="t-label">Nuevo box</label>
-            <input class="t-input" id="in-nuevo-box" placeholder="Ej: Box 5" required>
-          </div>
-          <button type="submit" class="t-btn primary">Agregar</button>
-        </form>
-      </div>
-
-      <!-- Horarios -->
-      <div class="t-form-card">
-        <div class="t-form-title">🕒 Horarios de turno</div>
-        <div id="lista-horarios"></div>
-        <div class="t-empty t-hidden" id="empty-horarios">No hay horarios cargados.</div>
-        <form id="form-agregar-horario" class="t-mt" style="display:flex;gap:8px;align-items:flex-end">
-          <div class="t-field" style="margin-bottom:0;flex:1">
-            <label class="t-label">Nuevo horario</label>
-            <input type="time" class="t-input" id="in-nuevo-horario" required>
-          </div>
-          <button type="submit" class="t-btn primary">Agregar</button>
-        </form>
-      </div>
-
-    </div>
-
-    <!-- Fleteros: ya no se administran acá -->
-    <div class="t-form-card" style="margin:0 16px 16px">
-      <div class="t-form-title">🚚 Fleteros</div>
-      <div class="t-resumen" style="padding:0 0 8px">
-        El listado de fleteros sale directo del catálogo de Unidades de Portería (nombre del chofer sincronizado desde Drivin, o transportista/dominio si no hay chofer cargado). No hace falta darlos de alta acá — para agregar o corregir uno, se actualiza en Unidades.
-      </div>
-    </div>
-
-    <!-- Operarios de fin de carga -->
-    <div class="t-form-card" style="margin:0 16px 16px">
-      <div class="t-form-title">🧑‍🔧 Operarios (fin de carga)</div>
-      <div class="t-resumen" style="padding:0 0 8px">Esta es la lista que ven los operarios en el link público de fin de carga para elegir "quién sos".</div>
-      <div id="lista-operarios"></div>
-      <div class="t-empty t-hidden" id="empty-operarios">No hay operarios cargados.</div>
-      <form id="form-agregar-operario" class="t-mt" style="display:flex;gap:8px;align-items:flex-end">
-        <div class="t-field" style="margin-bottom:0;flex:1">
-          <label class="t-label">Nombre</label>
-          <input class="t-input" id="in-nuevo-operario-nombre" required>
-        </div>
-        <button type="submit" class="t-btn primary">Agregar</button>
-      </form>
-    </div>
-
-  </div>
-
 </div>
 
-<div id="toast-container" style="position:fixed;bottom:16px;left:50%;transform:translateX(-50%);z-index:1000;display:flex;flex-direction:column;gap:8px;align-items:center"></div>
+<script>
+  window.location.replace('https://porteria.andesmarcargas.com/web/admin-turnero.html');
+</script>
 
-<script src="js/api.js"></script>
-<script src="js/api-turnero.js"></script>
-<script src="js/turnero-common.js"></script>
-<script src="js/admin-turnero.js"></script>
 </body>
 </html>

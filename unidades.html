@@ -1,119 +1,67 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta name="theme-color" content="#004D93">
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <title>Unidades — IngresoPorterias</title>
-  <link rel="icon" href="data:,">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@400;500;600;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/estilos.css">
-  <style id="qr-label-size"></style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta http-equiv="refresh" content="3;url=https://porteria.andesmarcargas.com/web/unidades.html">
+<title>Porterías — Nueva dirección</title>
+<link rel="icon" href="data:,">
+<style>
+  :root { color-scheme: light; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; min-height: 100vh; display: flex; align-items: center; justify-content: center;
+    background: #0b1f3a; color: #eef3fb;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    padding: 24px;
+  }
+  .card {
+    max-width: 420px; width: 100%; text-align: center;
+    background: #122a4d; border: 1px solid #1f3f6e; border-radius: 16px;
+    padding: 36px 28px; box-shadow: 0 10px 30px rgba(0,0,0,.35);
+  }
+  .logo { font-weight: 700; font-size: 1.3rem; letter-spacing: .5px; color: #fff; margin-bottom: 4px; }
+  .sub { font-size: .85rem; color: #9fb3d1; margin-bottom: 22px; }
+  h1 { font-size: 1.15rem; margin: 0 0 10px; color: #fff; }
+  p { font-size: .92rem; line-height: 1.5; color: #cdd9ec; margin: 0 0 18px; }
+  .btn {
+    display: inline-block; width: 100%; padding: 13px 16px; border-radius: 10px;
+    background: #2dd4a7; color: #06281f; font-weight: 700; text-decoration: none;
+    font-size: .95rem; margin-bottom: 20px;
+  }
+  .contacto {
+    border-top: 1px solid #1f3f6e; padding-top: 16px; font-size: .82rem; color: #9fb3d1;
+  }
+  .contacto a { color: #7fd1ff; text-decoration: none; }
+  .spinner {
+    width: 22px; height: 22px; margin: 0 auto 18px; border-radius: 50%;
+    border: 3px solid #2dd4a733; border-top-color: #2dd4a7; animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
 </head>
 <body>
 
-<header class="topbar">
-  <div class="topbar-logo">PorterÍas</div>
-  <div class="topbar-predio">
-    <div class="topbar-user" id="topbar-user"></div>
-    <div id="topbar-predio"></div>
-  </div>
-  <button id="btn-logout" class="btn btn-outline btn-sm" style="margin-left:8px;min-height:36px;width:auto;padding:6px 12px;font-size:.78rem">Salir</button>
-</header>
+<div class="card">
+  <div class="logo">Porterías</div>
+  <div class="sub">Sistema de Ingresos y Egresos</div>
 
-<main>
+  <div class="spinner"></div>
+  <h1>Este link ya no se usa más</h1>
+  <p><strong>pauladonaire.github.io/porteriasandesmar</strong> fue dado de baja.<br>Usá el nuevo link — te estamos redirigiendo automáticamente. Si no pasa nada en unos segundos, tocá el botón:</p>
 
-<!-- ── UNIDADES / EXPORTAR QR ─────────────────────── -->
-<div id="view-unidades" class="view">
-  <div class="container">
-    <button class="btn-back" data-goto="home">← Volver</button>
-    <div class="form-title" style="padding-top:16px">Unidades de Distribución</div>
-    <div class="form-subtitle">Catálogo sincronizado desde Drivin — exportá los QR para imprimir</div>
+  <a class="btn" id="btn-ir" href="https://porteria.andesmarcargas.com/web/unidades.html">Ir al nuevo sitio</a>
 
-    <div class="qr-toolbar">
-      <input type="text" id="qr-buscar" placeholder="Buscar por dominio, interno, flota o transportista…">
-      <button type="button" id="btn-sel-todo" class="btn btn-outline btn-sm" style="width:auto">Seleccionar todo</button>
-      <button type="button" id="btn-sel-ninguno" class="btn btn-outline btn-sm" style="width:auto">Ninguno</button>
-      <span id="qr-contador" class="text-muted" style="font-size:.78rem"></span>
-    </div>
-    <div class="qr-toolbar">
-      <label class="qr-label-size-field">
-        Etiqueta:
-        <input type="number" id="qr-label-w" value="100" min="20" max="300" step="1"> ×
-        <input type="number" id="qr-label-h" value="150" min="20" max="300" step="1"> mm
-      </label>
-      <button type="button" id="btn-imprimir-qr" class="btn btn-primary btn-sm" style="width:auto">🖨️ Exportar / Imprimir</button>
-    </div>
-    <div class="qr-hint">Tocá una tarjeta para elegirla. Sin nada seleccionado, se exporta todo lo que ves en pantalla — una etiqueta por hoja, con el tamaño indicado arriba, solo QR + dominio.</div>
-
-    <div id="qr-empty" class="empty" style="display:none">
-      <p>Sin unidades para mostrar</p>
-    </div>
-    <div id="qr-grid" class="qr-grid"></div>
+  <div class="contacto">
+    Ante cualquier duda, comunicate con <strong>Paula Donaire</strong><br>
+    <a href="tel:+542615965788">2615965788</a>
   </div>
 </div>
 
-</main>
-
-<!-- ── MODAL: QR individual ───────────────────────── -->
-<div id="modal-qr-individual" class="modal-backdrop" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:150;align-items:center;justify-content:center;padding:16px">
-  <div style="background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:24px;width:100%;max-width:320px;text-align:center">
-    <img id="qr-modal-img" src="" alt="QR" style="width:100%;max-width:220px">
-    <div id="qr-modal-dominio" style="font-family:'Barlow Condensed',sans-serif;font-size:1.4rem;font-weight:700;margin-top:10px"></div>
-    <div class="btn-row" style="margin-top:16px">
-      <button type="button" id="btn-cerrar-qr-modal" class="btn btn-outline">Cerrar</button>
-      <button type="button" id="btn-imprimir-qr-modal" class="btn btn-primary">🖨️ Imprimir este QR</button>
-    </div>
-  </div>
-</div>
-
-<nav id="bottom-nav">
-  <button class="nav-item" data-pagina="home">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-    Inicio
-  </button>
-  <button class="nav-item" data-pagina="distribucion" data-rol-oculto="porteria-restringida">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M1 3h15l3 9H4L1 3z"/><path d="M1 3l3 9v6h16v-6"/><circle cx="7" cy="19" r="2"/><circle cx="17" cy="19" r="2"/></svg>
-    Distribuc.
-  </button>
-  <button class="nav-item" data-pagina="trafico" data-rol-oculto="porteria-restringida">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
-    Tráfico
-  </button>
-  <button class="nav-item" data-pagina="personal" data-rol-oculto="porteria-restringida">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-    Personal
-  </button>
-  <button class="nav-item" data-pagina="indicadores" data-rol-min="supervisor">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-    KPIs
-  </button>
-  <button class="nav-item" data-pagina="unidades" data-rol-min="admin">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><line x1="14" y1="14" x2="21" y2="14"/><line x1="14" y1="21" x2="21" y2="21"/><line x1="17.5" y1="14" x2="17.5" y2="21"/></svg>
-    Unidades QR
-  </button>
-</nav>
-
-<div id="toast-container" aria-live="polite" aria-atomic="true"></div>
-
-<script src="js/api.js"></script>
-<script src="js/auth.js"></script>
-<script src="js/catalogos.js"></script>
-<script src="js/nav.js"></script>
-<script src="js/unidades.js"></script>
 <script>
-const ROLES_UNIDADES_QR = ['admin', 'supervisor', 'admin_deposito', 'operaciones', 'distribucion'];
-document.addEventListener('DOMContentLoaded', () => {
-  const u = Sesion.obtener();
-  if (!u || !ROLES_UNIDADES_QR.includes(rolEfectivo())) { window.location.href = 'index.html'; return; }
-  NavPage.init('unidades');
-  initUnidades();
-  App.mostrar('unidades');
-  Catalogos.cargar().then(() => Unidades.render()).catch(() => App.toast('No se pudieron cargar los catálogos', 'warn'));
-});
+  window.location.replace('https://porteria.andesmarcargas.com/web/unidades.html');
 </script>
+
 </body>
 </html>
