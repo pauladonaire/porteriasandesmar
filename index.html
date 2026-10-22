@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
-<meta http-equiv="refresh" content="3;url=https://porteria.andesmarcargas.com/web/index.html">
+<meta http-equiv="refresh" content="6;url=https://porteria.andesmarcargas.com/web/index.html">
 <title>Porterías — Nueva dirección</title>
 <link rel="icon" href="data:,">
 <style>
@@ -49,7 +49,7 @@
 
   <div class="spinner"></div>
   <h1>Este link ya no se usa más</h1>
-  <p><strong>pauladonaire.github.io/porteriasandesmar</strong> fue dado de baja.<br>Usá el nuevo link — te estamos redirigiendo automáticamente. Si no pasa nada en unos segundos, tocá el botón:</p>
+  <p><strong>pauladonaire.github.io/porteriasandesmar</strong> fue dado de baja.<br>Te vamos a redirigir al nuevo link en <strong id="cuenta">6</strong> segundos. Si no querés esperar, tocá el botón:</p>
 
   <a class="btn" id="btn-ir" href="https://porteria.andesmarcargas.com/web/index.html">Ir al nuevo sitio</a>
 
@@ -60,10 +60,21 @@
 </div>
 
 <script>
-  // Redirección inmediata por JS (más rápida que el meta-refresh de arriba, que queda
-  // solo como respaldo si JS estuviera deshabilitado). replace() en vez de href: no
-  // deja esta página stub en el historial, así "atrás" no vuelve acá.
-  window.location.replace('https://porteria.andesmarcargas.com/web/index.html');
+  // Demora de unos segundos (con cuenta regresiva visible) ANTES de redirigir — así el
+  // aviso de "este link ya no se usa más" se alcanza a leer, en vez de redirigir al
+  // instante (que es lo que pasaba antes: la redirección era tan rápida que el cartel
+  // nunca se llegaba a ver). replace() en vez de href: no deja esta página stub en el
+  // historial, así "atrás" no vuelve acá.
+  var segundos = 6;
+  var elCuenta = document.getElementById('cuenta');
+  var intervalo = setInterval(function() {
+    segundos--;
+    if (elCuenta) elCuenta.textContent = segundos;
+    if (segundos <= 0) {
+      clearInterval(intervalo);
+      window.location.replace('https://porteria.andesmarcargas.com/web/index.html');
+    }
+  }, 1000);
 </script>
 
 </body>
